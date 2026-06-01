@@ -3,13 +3,14 @@ import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/rendere
 import { parse, HTMLElement as NHTMLElement } from "node-html-parser";
 import path from "path";
 
-// Register DejaVu Sans (full Cyrillic support) from local TTF files
+// Liberation Serif — metric-compatible Times New Roman with full Cyrillic,
+// the standard typeface for official documents.
 const fontsDir = path.join(process.cwd(), "public", "fonts");
 Font.register({
-  family: "DejaVu",
+  family: "TimesDoc",
   fonts: [
-    { src: path.join(fontsDir, "DejaVuSans.ttf"), fontWeight: "normal" },
-    { src: path.join(fontsDir, "DejaVuSans-Bold.ttf"), fontWeight: "bold" },
+    { src: path.join(fontsDir, "LiberationSerif-Regular.ttf"), fontWeight: "normal" },
+    { src: path.join(fontsDir, "LiberationSerif-Bold.ttf"), fontWeight: "bold" },
   ],
 });
 
@@ -21,7 +22,7 @@ const s = StyleSheet.create({
     fontSize: 11,
     lineHeight: 1.6,
     color: "#1a1a1a",
-    fontFamily: "DejaVu",
+    fontFamily: "TimesDoc",
   },
   h2: {
     fontSize: 12,
