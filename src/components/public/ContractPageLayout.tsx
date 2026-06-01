@@ -26,13 +26,13 @@ export function ContractPageLayout({ templateHtml, fields, introText }: Props) {
   return (
     <div>
       {introText && (
-        <p className="text-gray-600 mb-6 text-sm bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
+        <p className="no-print text-gray-600 mb-6 text-sm bg-blue-50 border border-blue-100 rounded-lg px-4 py-3">
           {introText}
         </p>
       )}
 
       {/* Mobile tab toggle */}
-      <div className="flex border border-gray-200 rounded-lg overflow-hidden mb-4 md:hidden">
+      <div className="no-print flex border border-gray-200 rounded-lg overflow-hidden mb-4 md:hidden">
         <button
           className={`flex-1 py-2 text-sm font-medium transition-colors ${
             activeTab === "form"
@@ -59,7 +59,7 @@ export function ContractPageLayout({ templateHtml, fields, introText }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-6 items-start">
         {/* Form column */}
         <div
-          className={`md:block ${activeTab === "form" ? "block" : "hidden"}`}
+          className={`no-print md:block ${activeTab === "form" ? "block" : "hidden"}`}
         >
           <div className="bg-white border border-gray-200 rounded-xl p-6 md:sticky md:top-6">
             <h2 className="font-semibold text-gray-800 mb-4">
