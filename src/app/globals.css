@@ -60,20 +60,16 @@ body {
 
 /* Print styles */
 @media print {
-  body > * {
+  .no-print {
     display: none !important;
   }
 
   #contract-preview {
-    display: block !important;
-    position: static !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-  }
-
-  .no-print {
-    display: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
 
