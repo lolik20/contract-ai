@@ -136,7 +136,7 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
         </div>
       )}
 
-      <div className={showPreview ? "grid grid-cols-1 lg:grid-cols-2 gap-4" : ""}>
+      <div className="space-y-4">
         <textarea
           ref={taRef}
           value={content}
@@ -145,15 +145,25 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
             setSaved(false);
           }}
           spellCheck={false}
-          className="w-full h-[480px] border border-gray-300 rounded-lg p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+          className="w-full h-[320px] border border-gray-300 rounded-lg p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           placeholder="Введите текст договора. Используйте кнопки полей выше для вставки динамических значений."
         />
 
         {showPreview && (
-          <div className="h-[480px] overflow-auto border border-gray-200 rounded-lg p-6 bg-white">
+          <div className="h-[600px] overflow-auto border border-gray-200 rounded-lg bg-gray-100 p-4">
+            {/* True A4 sheet: 210×297mm with ~20mm document margins. */}
             <div
-              className="prose prose-sm max-w-none"
-              style={{ fontFamily: "'Times New Roman', serif" }}
+              className="bg-white shadow-md mx-auto prose prose-sm max-w-none"
+              style={{
+                width: "210mm",
+                minHeight: "297mm",
+                padding: "20mm",
+                boxSizing: "border-box",
+                fontFamily: "'Times New Roman', serif",
+                fontSize: "11pt",
+                lineHeight: 1.6,
+                color: "#1a1a1a",
+              }}
               dangerouslySetInnerHTML={{ __html: previewHtml }}
             />
           </div>
