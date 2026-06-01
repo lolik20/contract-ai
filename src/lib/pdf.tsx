@@ -3,13 +3,13 @@ import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/rendere
 import { parse, HTMLElement as NHTMLElement } from "node-html-parser";
 import path from "path";
 
-// Register Roboto with Cyrillic support from local files
+// Register DejaVu Sans (full Cyrillic support) from local TTF files
 const fontsDir = path.join(process.cwd(), "public", "fonts");
 Font.register({
-  family: "Roboto",
+  family: "DejaVu",
   fonts: [
-    { src: path.join(fontsDir, "Roboto-Regular.woff2"), fontWeight: "normal" },
-    { src: path.join(fontsDir, "Roboto-Bold.woff2"), fontWeight: "bold" },
+    { src: path.join(fontsDir, "DejaVuSans.ttf"), fontWeight: "normal" },
+    { src: path.join(fontsDir, "DejaVuSans-Bold.ttf"), fontWeight: "bold" },
   ],
 });
 
@@ -21,7 +21,7 @@ const s = StyleSheet.create({
     fontSize: 11,
     lineHeight: 1.6,
     color: "#1a1a1a",
-    fontFamily: "Roboto",
+    fontFamily: "DejaVu",
   },
   h2: {
     fontSize: 12,
