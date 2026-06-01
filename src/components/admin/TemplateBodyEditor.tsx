@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { TemplateField } from "@prisma/client";
-import { renderTemplate } from "@/lib/template";
+import { renderTemplate, formatValues } from "@/lib/template";
 
 interface Props {
   contractId: string;
@@ -77,7 +77,7 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
     }
   };
 
-  const previewHtml = renderTemplate(content, sampleValues(fields));
+  const previewHtml = renderTemplate(content, formatValues(sampleValues(fields), fields));
 
   return (
     <div>

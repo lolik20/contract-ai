@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { TemplateField } from "@prisma/client";
 import { ContractFillForm } from "./ContractFillForm";
 import { ContractPreview } from "./ContractPreview";
+import { formatValues } from "@/lib/template";
 
 interface Props {
   contractId: string;
@@ -27,7 +28,7 @@ export function ContractPageLayout({ contractId, templateHtml, fields, introText
       const res = await fetch(`/api/contracts/${contractId}/pdf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(formatValues(values, fields)),
       });
       if (!res.ok) throw new Error("PDF generation failed");
 
@@ -108,7 +109,7 @@ export function ContractPageLayout({ contractId, templateHtml, fields, introText
 
         {/* Preview column */}
         <div className={`md:block ${activeTab === "preview" ? "block" : "hidden"}`}>
-          <ContractPreview templateHtml={templateHtml} values={values} />
+          <ContractPreview templateHtml={templateHtml} values={formatValues(values, fields)} />
         </div>
       </div>
     </div>
