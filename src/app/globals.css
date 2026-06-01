@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", Arial, Helvetica, sans-serif;
+}
+
+/* Contract preview styling */
+.contract-document {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+
+.contract-document h2 {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+  letter-spacing: 0.05em;
+}
+
+.contract-document h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.contract-document p {
+  margin-bottom: 8px;
+  text-align: justify;
+}
+
+.contract-document ul {
+  margin-left: 20px;
+  margin-bottom: 8px;
+}
+
+.contract-document ul li {
+  margin-bottom: 4px;
+}
+
+.placeholder-empty {
+  background: #fef3c7;
+  border: 1px dashed #f59e0b;
+  border-radius: 3px;
+  padding: 0 4px;
+  font-style: italic;
+  color: #92400e;
+}
+
+/* Print styles */
+@media print {
+  body > * {
+    display: none !important;
+  }
+
+  #contract-preview {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 20mm;
+}

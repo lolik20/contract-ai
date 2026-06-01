@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ContractType {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  description String?
+  isPublished Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  seo         ContractSeo?
+  template    ContractTemplate?
+
+  @@map("contract_types")
+}
+
+model ContractSeo {
+  id              String       @id @default(cuid())
+  contractTypeId  String       @unique
+  contractType    ContractType @relation(fields: [contractTypeId], references: [id], onDelete: Cascade)
+
+  pageTitle       String
+  metaDescription String
+  keywords        String?
+  ogTitle         String?
+  ogDescription   String?
+  h1              String?
+  introText       String?
+
+  @@map("contract_seo")
+}
+
+model ContractTemplate {
+  id             String          @id @default(cuid())
+  contractTypeId String          @unique
+  contractType   ContractType    @relation(fields: [contractTypeId], references: [id], onDelete: Cascade)
+
+  content        String
+  version        Int             @default(1)
+  updatedAt      DateTime        @updatedAt
+
+  fields         TemplateField[]
+
+  @@map("contract_templates")
+}
+
+model TemplateField {
+  id           String           @id @default(cuid())
+  templateId   String
+  template     ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  name         String
+  label        String
+  type         FieldType        @default(TEXT)
+  placeholder  String?
+  defaultValue String?
+  required     Boolean          @default(true)
+  order        Int              @default(0)
+  options      String?
+
+  @@unique([templateId, name])
+  @@map("template_fields")
+}
+
+enum FieldType {
+  TEXT
+  TEXTAREA
+  DATE
+  NUMBER
+  SELECT
+  EMAIL
+  PHONE
+}
