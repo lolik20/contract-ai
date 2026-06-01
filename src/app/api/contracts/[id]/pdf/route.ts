@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pdf } from "@react-pdf/renderer";
+import { renderToStream } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { prisma } from "@/lib/prisma";
 import { renderTemplate } from "@/lib/template";
@@ -24,11 +24,19 @@ export async function POST(req: Request, { params }: Ctx) {
   const values: Record<string, string> = await req.json();
   const htmlContent = renderTemplate(contract.template.content, values);
 
-  const pdfString = await pdf(
+  // Canonical Node.js server-side rendering: renderToStream → collect into Buffer
+  const stream = await renderToStream(
     createElement(ContractPdfDocument, { title: contract.name, htmlContent })
-  ).toString();
+  );
 
-  const buffer = Buffer.from(pdfString, "binary");
+  const chunks: Buffer[] = [];
+  const buffer: Buffer = await new Promise((resolve, reject) => {
+    stream.on("data", (chunk) =>
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    );
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
+  });
 
   return new NextResponse(buffer as unknown as BodyInit, {
     headers: {
