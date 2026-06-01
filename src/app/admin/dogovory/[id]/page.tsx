@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { FieldList } from "@/components/admin/FieldList";
 import { ContractMetaEditor } from "@/components/admin/ContractMetaEditor";
+import { TemplateBodyEditor } from "@/components/admin/TemplateBodyEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -53,11 +54,23 @@ export default async function EditContractPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Поля договора</h2>
         <FieldList
           contractId={id}
           initialFields={contract.template?.fields ?? []}
+        />
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Текст договора</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Редактируйте текст договора и вставляйте поля. Превью обновляется на лету.
+        </p>
+        <TemplateBodyEditor
+          contractId={id}
+          initialContent={contract.template?.content ?? ""}
+          fields={contract.template?.fields ?? []}
         />
       </div>
     </div>
