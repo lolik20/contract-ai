@@ -12,7 +12,7 @@ interface Props {
 
 export async function generateStaticParams() {
   const contracts = await prisma.contractType.findMany({
-    where: { isPublished: true },
+    where: {},
     select: { slug: true },
   });
   return contracts.map((c) => ({ slug: c.slug }));
@@ -42,16 +42,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ContractPage({ params }: Props) {
   const { slug } = await params;
   const contract = await prisma.contractType.findUnique({
-    where: { slug, isPublished: true },
+    where: { slug },
     include: {
       seo: true,
       template: { include: { fields: true } },
     },
   });
 
-  if (!contract || !contract.template) return notFound();
+  if (!contract) return notFound();
 
   const { seo, template } = contract;
+  const fields = template?.fields ?? [];
+  const content = template?.content ?? "";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,8 +75,8 @@ export default async function ContractPage({ params }: Props) {
         </div>
 
         <ContractPageLayout
-          templateHtml={template.content}
-          fields={template.fields}
+          templateHtml={content}
+          fields={fields}
           introText={seo?.introText}
         />
       </main>
