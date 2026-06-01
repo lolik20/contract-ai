@@ -1,9 +1,11 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEffect } from "react";
 import type { TemplateField } from "@prisma/client";
+import { transliterate } from "@/lib/transliterate";
 
 const FIELD_TYPES = [
   { value: "TEXT", label: "Текст" },
@@ -37,23 +39,33 @@ interface Props {
 }
 
 export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCancel }: Props) {
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: field
-      ? {
-          name: field.name,
-          label: field.label,
-          type: field.type as FormData["type"],
-          placeholder: field.placeholder ?? "",
-          defaultValue: field.defaultValue ?? "",
-          required: field.required,
-          order: field.order,
-          options: field.options ?? "",
-        }
-      : { type: "TEXT", required: true, order: defaultOrder },
-  });
+  const isNew = !field;
+  const { register, handleSubmit, watch, setValue, control, formState: { errors, isSubmitting } } =
+    useForm<FormData>({
+      resolver: zodResolver(schema),
+      defaultValues: field
+        ? {
+            name: field.name,
+            label: field.label,
+            type: field.type as FormData["type"],
+            placeholder: field.placeholder ?? "",
+            defaultValue: field.defaultValue ?? "",
+            required: field.required,
+            order: field.order,
+            options: field.options ?? "",
+          }
+        : { type: "TEXT", required: true, order: defaultOrder },
+    });
 
   const type = watch("type");
+  const label = useWatch({ control, name: "label", defaultValue: "" });
+
+  // Auto-generate name from label for new fields
+  useEffect(() => {
+    if (!isNew) return;
+    const generated = transliterate(label).replace(/-/g, "_");
+    setValue("name", generated, { shouldValidate: false });
+  }, [label, isNew, setValue]);
 
   const onSubmit = async (data: FormData) => {
     const url = field
@@ -71,10 +83,23 @@ export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCa
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <div>
+        <label className="block text-xs font-medium text-gray-700 mb-1">
+          Подпись (label)
+        </label>
+        <input
+          {...register("label")}
+          className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="ФИО арендатора"
+          autoFocus
+        />
+        {errors.label && <p className="text-red-500 text-xs mt-0.5">{errors.label.message}</p>}
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1">
-            Имя поля (key)
+            Имя поля {isNew && <span className="text-gray-400">(авто)</span>}
           </label>
           <input
             {...register("name")}
@@ -95,16 +120,6 @@ export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCa
             ))}
           </select>
         </div>
-      </div>
-
-      <div>
-        <label className="block text-xs font-medium text-gray-700 mb-1">Подпись (label)</label>
-        <input
-          {...register("label")}
-          className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="ФИО арендатора"
-        />
-        {errors.label && <p className="text-red-500 text-xs mt-0.5">{errors.label.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -162,11 +177,7 @@ export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCa
         >
           {isSubmitting ? "Сохранение..." : field ? "Обновить" : "Добавить"}
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-1.5 rounded text-sm border border-gray-300 hover:bg-gray-50"
-        >
+        <button type="button" onClick={onCancel} className="px-4 py-1.5 rounded text-sm border border-gray-300 hover:bg-gray-50">
           Отмена
         </button>
       </div>

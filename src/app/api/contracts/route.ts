@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { transliterate } from "@/lib/transliterate";
 
 const CreateSchema = z.object({
   name: z.string().min(1),
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
   description: z.string().optional(),
   isPublished: z.boolean().optional(),
 });
@@ -23,8 +23,16 @@ export async function POST(req: Request) {
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
+  // Auto-generate unique slug from name via transliteration
+  const baseSlug = transliterate(parsed.data.name);
+  let slug = baseSlug;
+  let suffix = 1;
+  while (await prisma.contractType.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${suffix++}`;
+  }
+
   const contract = await prisma.contractType.create({
-    data: parsed.data,
+    data: { ...parsed.data, slug },
   });
   return NextResponse.json(contract, { status: 201 });
 }
