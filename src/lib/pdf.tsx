@@ -124,9 +124,28 @@ function walk(node: NHTMLElement, elements: React.ReactElement[], key: { v: numb
           continue;
         }
       }
-      walk(child, elements, key);
+      // If the div has no block-level children (e.g. only spans/text),
+      // render its combined text as a paragraph so nothing is lost.
+      if (hasBlockChildren(child)) {
+        walk(child, elements, key);
+      } else {
+        const txt = child.innerText.replace(/\s+/g, " ").trim();
+        if (txt) elements.push(<Text key={k} style={s.p}>{txt}</Text>);
+      }
+    } else if (tag === "span") {
+      // Stray top-level span — capture its text
+      const txt = child.innerText.replace(/\s+/g, " ").trim();
+      if (txt) elements.push(<Text key={k} style={s.p}>{txt}</Text>);
     }
   }
+}
+
+const BLOCK_TAGS = new Set(["h1", "h2", "h3", "h4", "p", "ul", "ol", "li", "div", "section", "article"]);
+
+function hasBlockChildren(node: NHTMLElement): boolean {
+  return node.childNodes.some(
+    (c) => c instanceof NHTMLElement && BLOCK_TAGS.has(c.tagName?.toLowerCase() ?? "")
+  );
 }
 
 interface Props {
