@@ -1,5 +1,6 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { parse, HTMLElement as NHTMLElement } from "node-html-parser";
 
 const s = StyleSheet.create({
   page: {
@@ -17,7 +18,6 @@ const s = StyleSheet.create({
     textAlign: "center",
     textTransform: "uppercase",
     marginBottom: 14,
-    letterSpacing: 0.5,
   },
   h3: {
     fontSize: 11,
@@ -32,97 +32,105 @@ const s = StyleSheet.create({
   },
   li: {
     marginBottom: 3,
-    paddingLeft: 8,
+    paddingLeft: 12,
     fontFamily: "Times-Roman",
   },
   bold: {
     fontFamily: "Times-Bold",
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  signaturesRow: {
+  sigRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 24,
-    gap: 24,
   },
-  signatureBlock: {
+  sigBlock: {
     flex: 1,
   },
 });
 
-// ---- tiny HTML → tokens parser ----------------------------------------
+// Render inline content of a node: handles <strong>, text nodes, <span>
+function renderInline(node: NHTMLElement): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
 
-type Token =
-  | { type: "h2" | "h3" | "p"; text: string; html: string }
-  | { type: "li"; text: string }
-  | { type: "hr" };
-
-function stripTags(html: string) {
-  return html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function parseHtml(html: string): Token[] {
-  const tokens: Token[] = [];
-
-  // headings
-  html = html.replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, inner) => {
-    tokens.push({ type: "h2", text: stripTags(inner), html: inner });
-    return "%%TOKEN%%";
-  });
-  html = html.replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, inner) => {
-    tokens.push({ type: "h3", text: stripTags(inner), html: inner });
-    return "%%TOKEN%%";
-  });
-
-  // list items
-  html = html.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, inner) => {
-    tokens.push({ type: "li", text: "• " + stripTags(inner) });
-    return "%%TOKEN%%";
-  });
-
-  // paragraphs and divs
-  html = html.replace(/<(?:p|div)[^>]*>([\s\S]*?)<\/(?:p|div)>/gi, (_, inner) => {
-    const text = stripTags(inner).trim();
-    if (text) tokens.push({ type: "p", text, html: inner });
-    return "%%TOKEN%%";
-  });
-
-  // remaining text nodes outside tags
-  const leftover = stripTags(html).replace(/%%TOKEN%%/g, "").trim();
-  if (leftover) tokens.push({ type: "p", text: leftover, html: leftover });
-
-  return tokens;
-}
-
-// Render inline bold segments: text between <strong>…</strong>
-function renderRichText(html: string) {
-  const parts: React.ReactElement[] = [];
-  const regex = /<strong[^>]*>([\s\S]*?)<\/strong>/gi;
-  let last = 0;
-  let m: RegExpExecArray | null;
-  let i = 0;
-
-  while ((m = regex.exec(html)) !== null) {
-    if (m.index > last) {
-      const plain = stripTags(html.slice(last, m.index));
-      if (plain) parts.push(<Text key={i++}>{plain}</Text>);
+  for (const child of node.childNodes) {
+    if (child.nodeType === 3) {
+      // text node
+      const t = child.rawText.replace(/\s+/g, " ");
+      if (t.trim()) parts.push(t);
+    } else if (child instanceof NHTMLElement) {
+      const tag = child.tagName?.toLowerCase();
+      if (tag === "strong" || tag === "b") {
+        parts.push(
+          <Text key={parts.length} style={s.bold}>
+            {child.innerText.replace(/\s+/g, " ")}
+          </Text>
+        );
+      } else {
+        // span, em, any other inline — treat as plain text
+        const t = child.innerText.replace(/\s+/g, " ");
+        if (t.trim()) parts.push(t);
+      }
     }
-    const bold = stripTags(m[1]);
-    parts.push(<Text key={i++} style={s.bold}>{bold}</Text>);
-    last = m.index + m[0].length;
   }
 
-  const tail = stripTags(html.slice(last));
-  if (tail) parts.push(<Text key={i++}>{tail}</Text>);
-
-  return parts.length > 0 ? parts : [<Text key={0}>{stripTags(html)}</Text>];
+  return parts;
 }
 
-// -----------------------------------------------------------------------
+// Walk the DOM tree and collect PDF elements
+function walk(node: NHTMLElement, elements: React.ReactElement[], key: { v: number }) {
+  for (const child of node.childNodes) {
+    if (!(child instanceof NHTMLElement)) continue;
+
+    const tag = child.tagName?.toLowerCase();
+    const k = key.v++;
+
+    if (tag === "h2") {
+      elements.push(
+        <Text key={k} style={s.h2}>{child.innerText.replace(/\s+/g, " ").trim()}</Text>
+      );
+    } else if (tag === "h3") {
+      elements.push(
+        <Text key={k} style={s.h3}>{child.innerText.replace(/\s+/g, " ").trim()}</Text>
+      );
+    } else if (tag === "p") {
+      const inline = renderInline(child);
+      if (inline.length > 0) {
+        elements.push(
+          <Text key={k} style={s.p}>{inline}</Text>
+        );
+      }
+    } else if (tag === "ul") {
+      // render each <li>
+      for (const li of child.querySelectorAll("li")) {
+        elements.push(
+          <Text key={key.v++} style={s.li}>{"• " + li.innerText.replace(/\s+/g, " ").trim()}</Text>
+        );
+      }
+    } else if (tag === "li") {
+      elements.push(
+        <Text key={k} style={s.li}>{"• " + child.innerText.replace(/\s+/g, " ").trim()}</Text>
+      );
+    } else if (tag === "div" || tag === "section" || tag === "article") {
+      // check if this div contains a signature block (2 child divs side by side)
+      const childDivs = child.querySelectorAll(":scope > div");
+      if (childDivs.length === 2 && child.classNames.includes("grid")) {
+        // signatures row
+        const left = childDivs[0].innerText.replace(/\s+/g, " ").trim();
+        const right = childDivs[1].innerText.replace(/\s+/g, " ").trim();
+        elements.push(
+          <View key={k} style={s.sigRow}>
+            <Text style={[s.p, s.sigBlock]}>{left}</Text>
+            <Text style={[s.p, s.sigBlock]}>{right}</Text>
+          </View>
+        );
+      } else {
+        // recurse into div
+        walk(child, elements, key);
+      }
+    }
+    // ignore: span (inline only), script, style, etc.
+  }
+}
 
 interface Props {
   title: string;
@@ -130,30 +138,14 @@ interface Props {
 }
 
 export function ContractPdfDocument({ title, htmlContent }: Props) {
-  const tokens = parseHtml(htmlContent);
+  const root = parse(htmlContent);
+  const elements: React.ReactElement[] = [];
+  walk(root as unknown as NHTMLElement, elements, { v: 0 });
 
   return (
     <Document title={title}>
       <Page size="A4" style={s.page}>
-        {tokens.map((token, idx) => {
-          if (token.type === "h2") {
-            return <Text key={idx} style={s.h2}>{token.text}</Text>;
-          }
-          if (token.type === "h3") {
-            return <Text key={idx} style={s.h3}>{token.text}</Text>;
-          }
-          if (token.type === "li") {
-            return <Text key={idx} style={s.li}>{token.text}</Text>;
-          }
-          if (token.type === "p" && token.html) {
-            return (
-              <Text key={idx} style={s.p}>
-                {renderRichText(token.html)}
-              </Text>
-            );
-          }
-          return null;
-        })}
+        {elements}
       </Page>
     </Document>
   );
