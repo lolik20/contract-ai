@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { transliterate } from "@/lib/transliterate";
 
 const UpdateSchema = z.object({
   name: z.string().min(1).optional(),
-  slug: z.string().regex(/^[a-z0-9-]+$/).optional(),
   description: z.string().nullable().optional(),
   isPublished: z.boolean().optional(),
 });
@@ -28,10 +28,22 @@ export async function PUT(req: Request, { params }: Ctx) {
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const contract = await prisma.contractType.update({
-    where: { id },
-    data: parsed.data,
-  });
+  const data: Record<string, unknown> = { ...parsed.data };
+
+  // If name changed — recalculate slug
+  if (parsed.data.name) {
+    const baseSlug = transliterate(parsed.data.name);
+    let slug = baseSlug;
+    let suffix = 1;
+    while (true) {
+      const existing = await prisma.contractType.findUnique({ where: { slug } });
+      if (!existing || existing.id === id) break;
+      slug = `${baseSlug}-${suffix++}`;
+    }
+    data.slug = slug;
+  }
+
+  const contract = await prisma.contractType.update({ where: { id }, data });
   return NextResponse.json(contract);
 }
 
