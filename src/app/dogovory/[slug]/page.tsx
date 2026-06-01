@@ -75,6 +75,7 @@ export default async function ContractPage({ params }: Props) {
         </div>
 
         <ContractPageLayout
+          contractId={contract.id}
           templateHtml={content}
           fields={fields}
           introText={seo?.introText}
