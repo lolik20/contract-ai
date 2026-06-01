@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { TemplateEditor } from "@/components/admin/TemplateEditor";
 import { FieldList } from "@/components/admin/FieldList";
 import { ContractMetaEditor } from "@/components/admin/ContractMetaEditor";
 
@@ -23,7 +22,7 @@ export default async function EditContractPage({ params }: Props) {
   if (!contract) return notFound();
 
   return (
-    <div className="p-8">
+    <div className="p-8 max-w-3xl">
       <div className="flex items-center gap-3 mb-4">
         <Link href="/admin/dogovory" className="text-gray-400 hover:text-gray-600 text-sm">
           ← Все договоры
@@ -54,25 +53,12 @@ export default async function EditContractPage({ params }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-1">HTML шаблон</h2>
-          <p className="text-xs text-gray-500 mb-4">
-            Используйте <code className="bg-gray-100 px-1 rounded">{"{{имя_поля}}"}</code> для вставки значений
-          </p>
-          <TemplateEditor
-            contractId={id}
-            initialContent={contract.template?.content ?? ""}
-          />
-        </div>
-
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Поля договора</h2>
-          <FieldList
-            contractId={id}
-            initialFields={contract.template?.fields ?? []}
-          />
-        </div>
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Поля договора</h2>
+        <FieldList
+          contractId={id}
+          initialFields={contract.template?.fields ?? []}
+        />
       </div>
     </div>
   );
