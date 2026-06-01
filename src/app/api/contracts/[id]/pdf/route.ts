@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
+import { pdf } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { prisma } from "@/lib/prisma";
 import { renderTemplate } from "@/lib/template";
@@ -24,12 +24,11 @@ export async function POST(req: Request, { params }: Ctx) {
   const values: Record<string, string> = await req.json();
   const htmlContent = renderTemplate(contract.template.content, values);
 
-  const buffer = await renderToBuffer(
-    createElement(ContractPdfDocument, {
-      title: contract.name,
-      htmlContent,
-    })
-  );
+  const pdfString = await pdf(
+    createElement(ContractPdfDocument, { title: contract.name, htmlContent })
+  ).toString();
+
+  const buffer = Buffer.from(pdfString, "binary");
 
   return new NextResponse(buffer as unknown as BodyInit, {
     headers: {
