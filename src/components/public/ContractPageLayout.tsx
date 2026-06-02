@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import type { TemplateField, ContractSection } from "@prisma/client";
+import type { TemplateField, ContractSection, SectionField } from "@prisma/client";
 import { ContractFillForm } from "./ContractFillForm";
 import { ContractPreview } from "./ContractPreview";
 import { formatValues } from "@/lib/template";
+
+type SectionWithFields = ContractSection & { fields: SectionField[] };
 
 interface Props {
   contractId: string;
   templateHtml: string;
   fields: TemplateField[];
-  sections: ContractSection[];
+  sections: SectionWithFields[];
   introText?: string | null;
 }
 
@@ -19,7 +21,6 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
   const [activeTab, setActiveTab] = useState<"form" | "preview">("form");
   const [downloading, setDownloading] = useState(false);
 
-  // Section toggle state — initialised from defaultEnabled
   const [enabledSections, setEnabledSections] = useState<Record<string, boolean>>(
     () => Object.fromEntries(sections.map((s) => [s.id, s.defaultEnabled]))
   );
@@ -28,6 +29,14 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
     setEnabledSections((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const enabledIds = sections.filter((s) => enabledSections[s.id]).map((s) => s.id);
+
+  // All fields (template + enabled section fields) for formatting
+  const allFields: TemplateField[] = [
+    ...fields,
+    ...sections
+      .filter((s) => enabledSections[s.id])
+      .flatMap((s) => s.fields as unknown as TemplateField[]),
+  ];
 
   const handleChange = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -40,12 +49,11 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          values: formatValues(values, fields),
+          values: formatValues(values, allFields),
           enabledSectionIds: enabledIds,
         }),
       });
       if (!res.ok) throw new Error("PDF generation failed");
-
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -68,20 +76,11 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
         </p>
       )}
 
-      {/* Mobile tab toggle */}
       <div className="no-print flex border border-gray-200 rounded-lg overflow-hidden mb-4 md:hidden">
-        <button
-          className={`flex-1 py-2 text-sm font-medium transition-colors ${activeTab === "form" ? "bg-blue-600 text-white" : "bg-white text-gray-600"}`}
-          onClick={() => setActiveTab("form")}
-        >
-          Заполнить
-        </button>
-        <button
-          className={`flex-1 py-2 text-sm font-medium transition-colors ${activeTab === "preview" ? "bg-blue-600 text-white" : "bg-white text-gray-600"}`}
-          onClick={() => setActiveTab("preview")}
-        >
-          Просмотр
-        </button>
+        <button className={`flex-1 py-2 text-sm font-medium transition-colors ${activeTab === "form" ? "bg-blue-600 text-white" : "bg-white text-gray-600"}`}
+          onClick={() => setActiveTab("form")}>Заполнить</button>
+        <button className={`flex-1 py-2 text-sm font-medium transition-colors ${activeTab === "preview" ? "bg-blue-600 text-white" : "bg-white text-gray-600"}`}
+          onClick={() => setActiveTab("preview")}>Просмотр</button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-6 items-start">
@@ -95,24 +94,19 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
                 <h2 className="font-semibold text-gray-800 mb-3">Разделы договора</h2>
                 <div className="space-y-2">
                   {sections.map((s) => (
-                    <label
-                      key={s.id}
-                      className="flex items-center gap-3 cursor-pointer group select-none"
-                    >
+                    <label key={s.id} className="flex items-center gap-3 cursor-pointer select-none">
                       <button
                         type="button"
                         role="switch"
                         aria-checked={enabledSections[s.id]}
                         onClick={() => toggleSection(s.id)}
-                        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors focus:outline-none ${
                           enabledSections[s.id] ? "bg-blue-600" : "bg-gray-200"
                         }`}
                       >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform mt-0.5 ${
-                            enabledSections[s.id] ? "translate-x-4" : "translate-x-0.5"
-                          }`}
-                        />
+                        <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform mt-0.5 ${
+                          enabledSections[s.id] ? "translate-x-4" : "translate-x-0.5"
+                        }`} />
                       </button>
                       <span className={`text-sm ${enabledSections[s.id] ? "text-gray-800" : "text-gray-400 line-through"}`}>
                         {s.title}
@@ -123,11 +117,29 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
               </div>
             )}
 
-            {/* Field form */}
-            <div>
-              <h2 className="font-semibold text-gray-800 mb-4">Заполните данные</h2>
-              <ContractFillForm fields={fields} values={values} onChange={handleChange} />
-            </div>
+            {/* Main template fields */}
+            {fields.length > 0 && (
+              <div>
+                <h2 className="font-semibold text-gray-800 mb-4">Заполните данные</h2>
+                <ContractFillForm fields={fields} values={values} onChange={handleChange} />
+              </div>
+            )}
+
+            {/* Section-specific fields (only when section is enabled) */}
+            {sections.map((s) =>
+              enabledSections[s.id] && s.fields.length > 0 ? (
+                <div key={s.id}>
+                  <h2 className="font-semibold text-gray-800 mb-3 text-sm border-l-2 border-blue-400 pl-2">
+                    {s.title}
+                  </h2>
+                  <ContractFillForm
+                    fields={s.fields as unknown as TemplateField[]}
+                    values={values}
+                    onChange={handleChange}
+                  />
+                </div>
+              ) : null
+            )}
 
             <button
               onClick={handleDownload}
@@ -159,7 +171,7 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
         <div className={`md:block ${activeTab === "preview" ? "block" : "hidden"}`}>
           <ContractPreview
             templateHtml={templateHtml}
-            values={formatValues(values, fields)}
+            values={formatValues(values, allFields)}
             sections={sections}
             enabledSectionIds={new Set(enabledIds)}
           />

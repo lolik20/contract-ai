@@ -81,7 +81,27 @@ model ContractSection {
   defaultEnabled Boolean          @default(true)
   updatedAt      DateTime         @updatedAt
 
+  fields         SectionField[]
+
   @@map("contract_sections")
+}
+
+model SectionField {
+  id           String          @id @default(cuid())
+  sectionId    String
+  section      ContractSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  name         String
+  label        String
+  type         FieldType       @default(TEXT)
+  placeholder  String?
+  defaultValue String?
+  required     Boolean         @default(true)
+  order        Int             @default(0)
+  options      String?
+
+  @@unique([sectionId, name])
+  @@map("section_fields")
 }
 
 enum FieldType {

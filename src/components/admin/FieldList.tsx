@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { TemplateField } from "@prisma/client";
 import { FieldEditor } from "./FieldEditor";
 
@@ -17,24 +17,35 @@ const TYPE_LABELS: Record<string, string> = {
 interface Props {
   contractId: string;
   initialFields: TemplateField[];
+  baseUrl?: string;
 }
 
-export function FieldList({ contractId, initialFields }: Props) {
+export function FieldList({ contractId, initialFields, baseUrl }: Props) {
   const [fields, setFields] = useState(
     [...initialFields].sort((a, b) => a.order - b.order)
   );
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
 
+  const base = baseUrl ?? `/api/contracts/${contractId}/fields`;
+
+  // When used with a custom baseUrl (e.g. section fields), fetch on mount
+  useEffect(() => {
+    if (!baseUrl) return;
+    fetch(base)
+      .then((r) => r.json())
+      .then((data: TemplateField[]) => setFields([...data].sort((a, b) => a.order - b.order)));
+  }, [base, baseUrl]);
+
   const reload = async () => {
-    const res = await fetch(`/api/contracts/${contractId}/fields`);
+    const res = await fetch(base);
     const data: TemplateField[] = await res.json();
     setFields([...data].sort((a, b) => a.order - b.order));
   };
 
   const deleteField = async (id: string) => {
     if (!confirm("Удалить поле?")) return;
-    await fetch(`/api/contracts/${contractId}/fields/${id}`, { method: "DELETE" });
+    await fetch(`${base}/${id}`, { method: "DELETE" });
     setFields((prev) => prev.filter((f) => f.id !== id));
   };
 
@@ -51,6 +62,7 @@ export function FieldList({ contractId, initialFields }: Props) {
                 <FieldEditor
                   contractId={contractId}
                   field={field}
+                  baseUrl={base}
                   onSaved={async () => {
                     setEditingId(null);
                     await reload();
@@ -99,6 +111,7 @@ export function FieldList({ contractId, initialFields }: Props) {
           <FieldEditor
             contractId={contractId}
             defaultOrder={fields.length + 1}
+            baseUrl={base}
             onSaved={async () => {
               setShowAdd(false);
               await reload();
