@@ -67,28 +67,30 @@ export function ContractPreview({ templateHtml, values, sections = [], enabledSe
   html += signaturesHtml(signatures);
 
   return (
-    <div
-      id="contract-preview"
-      className="shadow-sm border border-gray-200 rounded-lg"
-      style={{
-        fontFamily: "'Times New Roman', serif",
-        fontSize: "11pt",
-        lineHeight: 1.6,
-        color: "#1a1a1a",
-        padding: "20mm",
-        boxSizing: "border-box",
-        minHeight: "297mm",
-        background: `
-          repeating-linear-gradient(
+    <div id="contract-preview" className="bg-gray-200 rounded-lg p-4 space-y-0">
+      <div
+        className="bg-white shadow-md mx-auto"
+        style={{
+          width: "210mm",
+          minHeight: "297mm",
+          padding: "20mm",
+          boxSizing: "border-box",
+          fontFamily: "'Times New Roman', serif",
+          fontSize: "11pt",
+          lineHeight: 1.6,
+          color: "#1a1a1a",
+          /* Paint a gray band every 297mm to simulate page breaks */
+          backgroundImage: `repeating-linear-gradient(
             to bottom,
-            #fff 0,
-            #fff calc(297mm - 1px),
-            #d1d5db calc(297mm - 1px),
-            #d1d5db 297mm
-          )
-        `,
-      }}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
+            transparent 0,
+            transparent calc(297mm - 20px),
+            #e5e7eb calc(297mm - 20px),
+            #e5e7eb calc(297mm + 20px),
+            transparent calc(297mm + 20px)
+          )`,
+        }}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </div>
   );
 }
