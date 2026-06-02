@@ -47,6 +47,7 @@ model ContractTemplate {
   updatedAt      DateTime        @updatedAt
 
   fields         TemplateField[]
+  sections       ContractSection[]
 
   @@map("contract_templates")
 }
@@ -67,6 +68,20 @@ model TemplateField {
 
   @@unique([templateId, name])
   @@map("template_fields")
+}
+
+model ContractSection {
+  id             String           @id @default(cuid())
+  templateId     String
+  template       ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  title          String
+  content        String           @default("")
+  order          Int              @default(0)
+  defaultEnabled Boolean          @default(true)
+  updatedAt      DateTime         @updatedAt
+
+  @@map("contract_sections")
 }
 
 enum FieldType {

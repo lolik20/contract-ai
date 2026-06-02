@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { FieldList } from "@/components/admin/FieldList";
 import { ContractMetaEditor } from "@/components/admin/ContractMetaEditor";
 import { TemplateBodyEditor } from "@/components/admin/TemplateBodyEditor";
+import { SectionList } from "@/components/admin/SectionList";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,12 @@ export default async function EditContractPage({ params }: Props) {
   const contract = await prisma.contractType.findUnique({
     where: { id },
     include: {
-      template: { include: { fields: { orderBy: { order: "asc" } } } },
+      template: {
+        include: {
+          fields: { orderBy: { order: "asc" } },
+          sections: { orderBy: { order: "asc" } },
+        },
+      },
     },
   });
 
@@ -59,6 +65,17 @@ export default async function EditContractPage({ params }: Props) {
         <FieldList
           contractId={id}
           initialFields={contract.template?.fields ?? []}
+        />
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">Разделы договора</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Разделы — это выключаемые блоки текста. Пользователь может включить или отключить каждый раздел на странице договора.
+        </p>
+        <SectionList
+          contractId={id}
+          initialSections={contract.template?.sections ?? []}
         />
       </div>
 
