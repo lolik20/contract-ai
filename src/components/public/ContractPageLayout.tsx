@@ -168,6 +168,7 @@ export function ContractPageLayout({
               <h2 className="font-semibold text-gray-800 mb-3">Подписи сторон</h2>
               <div className="space-y-5">
                 <SignaturePad
+                  label={party1Label}
                   initials={signatures.p1.initials}
                   onInitialsChange={(v) =>
                     setSignatures((p) => ({ ...p, p1: { ...p.p1, initials: v } }))
@@ -177,6 +178,7 @@ export function ContractPageLayout({
                   }
                 />
                 <SignaturePad
+                  label={party2Label}
                   initials={signatures.p2.initials}
                   onInitialsChange={(v) =>
                     setSignatures((p) => ({ ...p, p2: { ...p.p2, initials: v } }))
