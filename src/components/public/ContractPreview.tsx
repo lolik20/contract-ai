@@ -19,16 +19,15 @@ export function ContractPreview({ templateHtml, values, sections = [], enabledSe
   let html: string;
 
   if (sections.length > 0 && enabledSectionIds) {
-    // Render only enabled sections
-    const parts = sections
+    const sectionsHtml = sections
       .filter((s) => enabledSectionIds.has(s.id))
       .map((s) => {
         const body = renderTemplate(s.content, values);
         return `<h3 style="font-weight:bold;margin-top:1.5em;margin-bottom:0.5em">${s.title}</h3>${body}`;
-      });
-    html = parts.join("\n");
+      })
+      .join("\n");
+    html = renderTemplate(templateHtml, values) + "\n" + sectionsHtml;
   } else {
-    // Fallback: legacy monolithic template
     html = renderTemplate(templateHtml, values);
   }
 
