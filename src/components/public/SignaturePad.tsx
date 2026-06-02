@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Props {
+  label: string;
   initials: string;
   onInitialsChange: (value: string) => void;
   onSignatureChange: (dataUrl: string | null) => void;
@@ -12,7 +13,7 @@ interface Props {
  * Адаптивный холст для рисования подписи (мышь + сенсор).
  * Отдаёт PNG data-URL через onSignatureChange (или null, если очищено).
  */
-export function SignaturePad({ initials, onInitialsChange, onSignatureChange }: Props) {
+export function SignaturePad({ label, initials, onInitialsChange, onSignatureChange }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const last = useRef<{ x: number; y: number } | null>(null);
@@ -116,7 +117,8 @@ export function SignaturePad({ initials, onInitialsChange, onSignatureChange }: 
 
   return (
     <div>
-      <div className="flex items-center justify-end mb-1.5">
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-sm font-medium text-gray-700">{label}</span>
         <button
           type="button"
           onClick={clear}
