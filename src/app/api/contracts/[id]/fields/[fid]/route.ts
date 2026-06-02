@@ -12,6 +12,7 @@ const UpdateSchema = z.object({
   required: z.boolean().optional(),
   order: z.number().int().optional(),
   options: z.string().nullable().optional(),
+  groupId: z.string().nullable().optional(),
 });
 
 interface Ctx { params: Promise<{ id: string; fid: string }> }

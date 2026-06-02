@@ -22,32 +22,6 @@ interface Props {
   signatures?: Signature[];
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function signaturesHtml(signatures: Signature[]): string {
-  if (signatures.length === 0) return "";
-  const blocks = signatures
-    .map((s) => {
-      const img = s.dataUrl
-        ? `<img src="${s.dataUrl}" alt="" style="display:block;width:100%;height:60px;object-fit:contain" />`
-        : `<div style="height:60px"></div>`;
-      const initials = s.initials ? escapeHtml(s.initials) : "_______________________";
-      return `<div style="width:45%">
-        <div style="font-weight:bold;margin-bottom:6px">${escapeHtml(s.label)}</div>
-        ${img}
-        <div style="border-top:1px solid #000;margin-top:2px;padding-top:3px">${initials}</div>
-      </div>`;
-    })
-    .join("");
-  return `<div style="display:flex;justify-content:space-between;margin-top:40px">${blocks}</div>`;
-}
-
 export function ContractPreview({ templateHtml, values, sections = [], enabledSectionIds, signatures = [] }: Props) {
   let html: string;
 
@@ -78,8 +52,32 @@ export function ContractPreview({ templateHtml, values, sections = [], enabledSe
           color: "#1a1a1a",
           background: "#fff",
         }}
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      >
+        <div dangerouslySetInnerHTML={{ __html: html }} />
+
+        {signatures.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 40 }}>
+            {signatures.map((s, i) => (
+              <div key={i} style={{ width: "45%" }}>
+                <div style={{ fontWeight: "bold", marginBottom: 6 }}>{s.label}</div>
+                {s.dataUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- подпись в виде data-URL, next/image не нужен
+                  <img
+                    src={s.dataUrl}
+                    alt=""
+                    style={{ display: "block", width: "100%", height: 60, objectFit: "contain" }}
+                  />
+                ) : (
+                  <div style={{ height: 60 }} />
+                )}
+                <div style={{ borderTop: "1px solid #000", marginTop: 2, paddingTop: 3 }}>
+                  {s.initials || "_______________________"}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

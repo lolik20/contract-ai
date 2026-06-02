@@ -50,15 +50,32 @@ model ContractTemplate {
   party2Label    String          @default("Сторона 2")
 
   fields         TemplateField[]
+  fieldGroups    FieldGroup[]
   sections       ContractSection[]
 
   @@map("contract_templates")
+}
+
+model FieldGroup {
+  id         String           @id @default(cuid())
+  templateId String
+  template   ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  title      String
+  order      Int              @default(0)
+
+  fields     TemplateField[]
+
+  @@map("field_groups")
 }
 
 model TemplateField {
   id           String           @id @default(cuid())
   templateId   String
   template     ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  groupId      String?
+  group        FieldGroup?      @relation(fields: [groupId], references: [id], onDelete: SetNull)
 
   name         String
   label        String

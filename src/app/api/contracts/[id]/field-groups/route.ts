@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { FieldType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
-const FieldSchema = z.object({
-  name: z.string().regex(/^[a-z_]+$/),
-  label: z.string().min(1),
-  type: z.nativeEnum(FieldType).optional(),
-  placeholder: z.string().nullable().optional(),
-  defaultValue: z.string().nullable().optional(),
-  required: z.boolean().optional(),
+const GroupSchema = z.object({
+  title: z.string().min(1),
   order: z.number().int().optional(),
-  options: z.string().nullable().optional(),
-  groupId: z.string().nullable().optional(),
 });
 
 interface Ctx { params: Promise<{ id: string }> }
@@ -21,10 +13,10 @@ export async function GET(_: Request, { params }: Ctx) {
   const { id } = await params;
   const contract = await prisma.contractType.findUnique({
     where: { id },
-    select: { template: { include: { fields: { orderBy: { order: "asc" } } } } },
+    select: { template: { include: { fieldGroups: { orderBy: { order: "asc" } } } } },
   });
   if (!contract?.template) return NextResponse.json([]);
-  return NextResponse.json(contract.template.fields);
+  return NextResponse.json(contract.template.fieldGroups);
 }
 
 export async function POST(req: Request, { params }: Ctx) {
@@ -43,12 +35,12 @@ export async function POST(req: Request, { params }: Ctx) {
   }
 
   const body = await req.json();
-  const parsed = FieldSchema.safeParse(body);
+  const parsed = GroupSchema.safeParse(body);
   if (!parsed.success)
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const field = await prisma.templateField.create({
+  const group = await prisma.fieldGroup.create({
     data: { templateId, ...parsed.data },
   });
-  return NextResponse.json(field, { status: 201 });
+  return NextResponse.json(group, { status: 201 });
 }

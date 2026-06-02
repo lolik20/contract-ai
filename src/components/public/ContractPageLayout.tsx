@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { TemplateField, ContractSection, SectionField } from "@prisma/client";
+import type { TemplateField, ContractSection, SectionField, FieldGroup } from "@prisma/client";
 import { ContractFillForm } from "./ContractFillForm";
 import { ContractPreview } from "./ContractPreview";
 import { SignaturePad } from "./SignaturePad";
@@ -16,6 +16,7 @@ interface Props {
   templateHtml: string;
   fields: TemplateField[];
   sections: SectionWithFields[];
+  fieldGroups?: FieldGroup[];
   introText?: string | null;
   party1Label?: string;
   party2Label?: string;
@@ -26,6 +27,7 @@ export function ContractPageLayout({
   templateHtml,
   fields,
   sections,
+  fieldGroups = [],
   introText,
   party1Label = "Сторона 1",
   party2Label = "Сторона 2",
@@ -65,6 +67,9 @@ export function ContractPageLayout({
       .filter((s) => enabledSections[s.id])
       .flatMap((s) => s.fields as unknown as TemplateField[]),
   ];
+
+  // Поля без группы (показываются под общим заголовком «Заполните данные»)
+  const ungroupedFields = fields.filter((f) => !f.groupId);
 
   const handleChange = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -109,7 +114,7 @@ export function ContractPageLayout({
         <button className={`flex-1 py-2 text-sm font-medium transition-colors ${activeTab === "form" ? "bg-blue-600 text-white" : "bg-white text-gray-600"}`}
           onClick={() => setActiveTab("form")}>Заполнить</button>
         <button className={`flex-1 py-2 text-sm font-medium transition-colors ${activeTab === "preview" ? "bg-blue-600 text-white" : "bg-white text-gray-600"}`}
-          onClick={() => setActiveTab("preview")}>Просмотр</button>
+          onClick={() => setActiveTab("preview")}>Предпросмотр</button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-[380px_1fr] gap-6 items-start">
@@ -117,11 +122,25 @@ export function ContractPageLayout({
         <div className={`no-print md:block ${activeTab === "form" ? "block" : "hidden"}`}>
           <div className="bg-white border border-gray-200 rounded-xl p-6 md:sticky md:top-6 space-y-6">
 
-            {/* Main template fields */}
+            {/* Main template fields — с группировкой по группам полей */}
             {fields.length > 0 && (
-              <div>
-                <h2 className="font-semibold text-gray-800 mb-4">Заполните данные</h2>
-                <ContractFillForm fields={fields} values={values} onChange={handleChange} />
+              <div className="space-y-5">
+                {ungroupedFields.length > 0 && (
+                  <div>
+                    <h2 className="font-semibold text-gray-800 mb-4">Заполните данные</h2>
+                    <ContractFillForm fields={ungroupedFields} values={values} onChange={handleChange} />
+                  </div>
+                )}
+                {fieldGroups.map((g) => {
+                  const groupFields = fields.filter((f) => f.groupId === g.id);
+                  if (groupFields.length === 0) return null;
+                  return (
+                    <div key={g.id}>
+                      <h2 className="font-semibold text-gray-800 mb-4">{g.title}</h2>
+                      <ContractFillForm fields={groupFields} values={values} onChange={handleChange} />
+                    </div>
+                  );
+                })}
               </div>
             )}
 

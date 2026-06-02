@@ -127,7 +127,7 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
       {/* ── RIGHT: A4 preview ── */}
       <div className="flex flex-col w-1/2 bg-gray-100">
         <div className="flex items-center px-4 py-2 border-b border-gray-200 bg-gray-50">
-          <span className="text-xs text-gray-500 font-medium">Превью A4</span>
+          <span className="text-xs text-gray-500 font-medium">Предпросмотр A4</span>
         </div>
         <div className="flex-1 overflow-auto bg-gray-100 p-6 flex justify-center">
           <div

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { FieldList } from "@/components/admin/FieldList";
+import { FieldGroupsManager } from "@/components/admin/FieldGroupsManager";
 import { ContractMetaEditor } from "@/components/admin/ContractMetaEditor";
 import { TemplateBodyEditor } from "@/components/admin/TemplateBodyEditor";
 import { SectionList } from "@/components/admin/SectionList";
@@ -21,6 +21,7 @@ export default async function EditContractPage({ params }: Props) {
       template: {
         include: {
           fields: { orderBy: { order: "asc" } },
+          fieldGroups: { orderBy: { order: "asc" } },
           sections: { orderBy: { order: "asc" } },
         },
       },
@@ -61,7 +62,11 @@ export default async function EditContractPage({ params }: Props) {
         <div className="flex gap-0 divide-x divide-gray-100 p-4">
           <div className="pr-6 min-w-64">
             <h2 className="text-sm font-semibold text-gray-800 mb-3">Поля договора</h2>
-            <FieldList contractId={id} initialFields={contract.template?.fields ?? []} />
+            <FieldGroupsManager
+              contractId={id}
+              initialFields={contract.template?.fields ?? []}
+              initialGroups={contract.template?.fieldGroups ?? []}
+            />
           </div>
           <div className="pl-6 min-w-64">
             <h2 className="text-sm font-semibold text-gray-800 mb-1">Разделы договора</h2>
