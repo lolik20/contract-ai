@@ -17,9 +17,19 @@ interface Props {
   fields: TemplateField[];
   sections: SectionWithFields[];
   introText?: string | null;
+  party1Label?: string;
+  party2Label?: string;
 }
 
-export function ContractPageLayout({ contractId, templateHtml, fields, sections, introText }: Props) {
+export function ContractPageLayout({
+  contractId,
+  templateHtml,
+  fields,
+  sections,
+  introText,
+  party1Label = "Сторона 1",
+  party2Label = "Сторона 2",
+}: Props) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<"form" | "preview">("form");
   const [downloading, setDownloading] = useState(false);
@@ -32,8 +42,8 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
   // Подписи для PDF/превью: сторона включается, если есть рисунок или инициалы.
   const signatureList = (
     [
-      { label: "Сторона 1", ...signatures.p1 },
-      { label: "Сторона 2", ...signatures.p2 },
+      { label: party1Label, ...signatures.p1 },
+      { label: party2Label, ...signatures.p2 },
     ] as const
   )
     .map((s) => ({ label: s.label, initials: s.initials, dataUrl: s.dataUrl ?? "" }))
@@ -158,7 +168,6 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
               <h2 className="font-semibold text-gray-800 mb-3">Подписи сторон</h2>
               <div className="space-y-5">
                 <SignaturePad
-                  label="Сторона 1"
                   initials={signatures.p1.initials}
                   onInitialsChange={(v) =>
                     setSignatures((p) => ({ ...p, p1: { ...p.p1, initials: v } }))
@@ -168,7 +177,6 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
                   }
                 />
                 <SignaturePad
-                  label="Сторона 2"
                   initials={signatures.p2.initials}
                   onInitialsChange={(v) =>
                     setSignatures((p) => ({ ...p, p2: { ...p.p2, initials: v } }))
