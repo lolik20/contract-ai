@@ -36,9 +36,11 @@ interface Props {
   defaultOrder?: number;
   onSaved: () => void;
   onCancel: () => void;
+  /** Override base URL, e.g. for section fields */
+  baseUrl?: string;
 }
 
-export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCancel }: Props) {
+export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCancel, baseUrl }: Props) {
   const isNew = !field;
   const { register, handleSubmit, watch, setValue, control, formState: { errors, isSubmitting } } =
     useForm<FormData>({
@@ -68,9 +70,8 @@ export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCa
   }, [label, isNew, setValue]);
 
   const onSubmit = async (data: FormData) => {
-    const url = field
-      ? `/api/contracts/${contractId}/fields/${field.id}`
-      : `/api/contracts/${contractId}/fields`;
+    const base = baseUrl ?? `/api/contracts/${contractId}/fields`;
+    const url = field ? `${base}/${field.id}` : base;
     const method = field ? "PUT" : "POST";
 
     const res = await fetch(url, {

@@ -16,7 +16,7 @@ export async function POST(req: Request, { params }: Ctx) {
     where: { id },
     include: {
       template: {
-        include: { sections: { orderBy: { order: "asc" } } },
+        include: { sections: { orderBy: { order: "asc" }, include: { fields: { orderBy: { order: "asc" } } } } },
       },
     },
   });

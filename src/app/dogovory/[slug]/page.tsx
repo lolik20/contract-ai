@@ -48,7 +48,10 @@ export default async function ContractPage({ params }: Props) {
       template: {
         include: {
           fields: true,
-          sections: { orderBy: { order: "asc" } },
+          sections: {
+            orderBy: { order: "asc" },
+            include: { fields: { orderBy: { order: "asc" } } },
+          },
         },
       },
     },
