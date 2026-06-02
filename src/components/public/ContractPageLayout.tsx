@@ -4,7 +4,10 @@ import { useState } from "react";
 import type { TemplateField, ContractSection, SectionField } from "@prisma/client";
 import { ContractFillForm } from "./ContractFillForm";
 import { ContractPreview } from "./ContractPreview";
+import { SignaturePad } from "./SignaturePad";
 import { formatValues } from "@/lib/template";
+
+type Party = { initials: string; dataUrl: string | null };
 
 type SectionWithFields = ContractSection & { fields: SectionField[] };
 
@@ -20,6 +23,21 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
   const [values, setValues] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<"form" | "preview">("form");
   const [downloading, setDownloading] = useState(false);
+
+  const [signatures, setSignatures] = useState<{ p1: Party; p2: Party }>({
+    p1: { initials: "", dataUrl: null },
+    p2: { initials: "", dataUrl: null },
+  });
+
+  // Подписи для PDF/превью: сторона включается, если есть рисунок или инициалы.
+  const signatureList = (
+    [
+      { label: "Сторона 1", ...signatures.p1 },
+      { label: "Сторона 2", ...signatures.p2 },
+    ] as const
+  )
+    .map((s) => ({ label: s.label, initials: s.initials, dataUrl: s.dataUrl ?? "" }))
+    .filter((s) => s.dataUrl || s.initials);
 
   const [enabledSections, setEnabledSections] = useState<Record<string, boolean>>(
     () => Object.fromEntries(sections.map((s) => [s.id, s.defaultEnabled]))
@@ -51,6 +69,7 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
         body: JSON.stringify({
           values: formatValues(values, allFields),
           enabledSectionIds: enabledIds,
+          signatures: signatureList,
         }),
       });
       if (!res.ok) throw new Error("PDF generation failed");
@@ -141,6 +160,33 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
               ) : null
             )}
 
+            {/* Подписи сторон */}
+            <div>
+              <h2 className="font-semibold text-gray-800 mb-3">Подписи сторон</h2>
+              <div className="space-y-5">
+                <SignaturePad
+                  label="Сторона 1"
+                  initials={signatures.p1.initials}
+                  onInitialsChange={(v) =>
+                    setSignatures((p) => ({ ...p, p1: { ...p.p1, initials: v } }))
+                  }
+                  onSignatureChange={(d) =>
+                    setSignatures((p) => ({ ...p, p1: { ...p.p1, dataUrl: d } }))
+                  }
+                />
+                <SignaturePad
+                  label="Сторона 2"
+                  initials={signatures.p2.initials}
+                  onInitialsChange={(v) =>
+                    setSignatures((p) => ({ ...p, p2: { ...p.p2, initials: v } }))
+                  }
+                  onSignatureChange={(d) =>
+                    setSignatures((p) => ({ ...p, p2: { ...p.p2, dataUrl: d } }))
+                  }
+                />
+              </div>
+            </div>
+
             <button
               onClick={handleDownload}
               disabled={downloading}
@@ -174,6 +220,7 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
             values={formatValues(values, allFields)}
             sections={sections}
             enabledSectionIds={new Set(enabledIds)}
+            signatures={signatureList}
           />
         </div>
       </div>

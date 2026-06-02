@@ -1,6 +1,15 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, Image, StyleSheet, Font } from "@react-pdf/renderer";
 import path from "path";
+
+export interface SignatureData {
+  /** Подпись стороны (например, "Сторона 1"). */
+  label: string;
+  /** Инициалы / Ф.И.О. подписанта. */
+  initials: string;
+  /** PNG data-URL нарисованной подписи (может быть пустым). */
+  dataUrl: string;
+}
 
 const fontsDir = path.join(process.cwd(), "public", "fonts");
 Font.register({
@@ -32,6 +41,33 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     marginBottom: 10,
     marginTop: 10,
+  },
+  signaturesRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 40,
+  },
+  signatureBlock: {
+    width: "45%",
+  },
+  signatureLabel: {
+    fontSize: 10,
+    fontWeight: "bold",
+    marginBottom: 6,
+  },
+  signatureImage: {
+    width: "100%",
+    height: 60,
+    objectFit: "contain",
+  },
+  signatureLine: {
+    borderTopWidth: 1,
+    borderTopColor: "#000000",
+    marginTop: 2,
+    paddingTop: 3,
+  },
+  signatureInitials: {
+    fontSize: 10,
   },
 });
 
@@ -70,9 +106,10 @@ function htmlToLines(html: string): { text: string; bold: boolean }[] {
 interface Props {
   title: string;
   htmlContent: string;
+  signatures?: SignatureData[];
 }
 
-export function ContractPdfDocument({ title, htmlContent }: Props) {
+export function ContractPdfDocument({ title, htmlContent, signatures = [] }: Props) {
   const lines = htmlToLines(htmlContent);
 
   return (
@@ -88,6 +125,27 @@ export function ContractPdfDocument({ title, htmlContent }: Props) {
               <Text style={line.bold ? styles.bold : styles.text}>{line.text}</Text>
             </View>
           ))
+        )}
+
+        {signatures.length > 0 && (
+          <View style={styles.signaturesRow} wrap={false}>
+            {signatures.map((sig, i) => (
+              <View key={i} style={styles.signatureBlock}>
+                <Text style={styles.signatureLabel}>{sig.label}</Text>
+                {sig.dataUrl ? (
+                  // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf <Image> has no alt prop
+                  <Image style={styles.signatureImage} src={sig.dataUrl} />
+                ) : (
+                  <View style={styles.signatureImage} />
+                )}
+                <View style={styles.signatureLine}>
+                  <Text style={styles.signatureInitials}>
+                    {sig.initials || "_______________________"}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
         )}
       </Page>
     </Document>
