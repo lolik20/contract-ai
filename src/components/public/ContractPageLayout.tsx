@@ -88,13 +88,21 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
         <div className={`no-print md:block ${activeTab === "form" ? "block" : "hidden"}`}>
           <div className="bg-white border border-gray-200 rounded-xl p-6 md:sticky md:top-6 space-y-6">
 
-            {/* Section toggles */}
-            {sections.length > 0 && (
+            {/* Main template fields */}
+            {fields.length > 0 && (
               <div>
-                <h2 className="font-semibold text-gray-800 mb-3">Разделы договора</h2>
-                <div className="space-y-2">
-                  {sections.map((s) => (
-                    <label key={s.id} className="flex items-center gap-3 cursor-pointer select-none">
+                <h2 className="font-semibold text-gray-800 mb-4">Заполните данные</h2>
+                <ContractFillForm fields={fields} values={values} onChange={handleChange} />
+              </div>
+            )}
+
+            {/* Section toggles + section-specific fields */}
+            {sections.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="font-semibold text-gray-800">Разделы договора</h2>
+                {sections.map((s) => (
+                  <div key={s.id}>
+                    <label className="flex items-center gap-3 cursor-pointer select-none mb-2">
                       <button
                         type="button"
                         role="switch"
@@ -108,37 +116,22 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
                           enabledSections[s.id] ? "translate-x-4" : "translate-x-0.5"
                         }`} />
                       </button>
-                      <span className={`text-sm ${enabledSections[s.id] ? "text-gray-800" : "text-gray-400 line-through"}`}>
+                      <span className={`text-sm font-medium ${enabledSections[s.id] ? "text-gray-800" : "text-gray-400 line-through"}`}>
                         {s.title}
                       </span>
                     </label>
-                  ))}
-                </div>
+                    {enabledSections[s.id] && s.fields.length > 0 && (
+                      <div className="pl-12">
+                        <ContractFillForm
+                          fields={s.fields as unknown as TemplateField[]}
+                          values={values}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            )}
-
-            {/* Main template fields */}
-            {fields.length > 0 && (
-              <div>
-                <h2 className="font-semibold text-gray-800 mb-4">Заполните данные</h2>
-                <ContractFillForm fields={fields} values={values} onChange={handleChange} />
-              </div>
-            )}
-
-            {/* Section-specific fields (only when section is enabled) */}
-            {sections.map((s) =>
-              enabledSections[s.id] && s.fields.length > 0 ? (
-                <div key={s.id}>
-                  <h2 className="font-semibold text-gray-800 mb-3 text-sm border-l-2 border-blue-400 pl-2">
-                    {s.title}
-                  </h2>
-                  <ContractFillForm
-                    fields={s.fields as unknown as TemplateField[]}
-                    values={values}
-                    onChange={handleChange}
-                  />
-                </div>
-              ) : null
             )}
 
             <button
