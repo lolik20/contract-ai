@@ -45,7 +45,12 @@ export default async function ContractPage({ params }: Props) {
     where: { slug },
     include: {
       seo: true,
-      template: { include: { fields: true } },
+      template: {
+        include: {
+          fields: true,
+          sections: { orderBy: { order: "asc" } },
+        },
+      },
     },
   });
 
@@ -53,6 +58,7 @@ export default async function ContractPage({ params }: Props) {
 
   const { seo, template } = contract;
   const fields = template?.fields ?? [];
+  const sections = template?.sections ?? [];
   const content = template?.content ?? "";
 
   return (
@@ -78,6 +84,7 @@ export default async function ContractPage({ params }: Props) {
           contractId={contract.id}
           templateHtml={content}
           fields={fields}
+          sections={sections}
           introText={seo?.introText}
         />
       </main>
