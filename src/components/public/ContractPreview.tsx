@@ -35,8 +35,25 @@ export function ContractPreview({ templateHtml, values, sections = [], enabledSe
   return (
     <div
       id="contract-preview"
-      className="bg-white shadow-sm border border-gray-200 rounded-lg p-10 min-h-[297mm]"
-      style={{ fontFamily: "'Times New Roman', serif" }}
+      className="shadow-sm border border-gray-200 rounded-lg"
+      style={{
+        fontFamily: "'Times New Roman', serif",
+        fontSize: "11pt",
+        lineHeight: 1.6,
+        color: "#1a1a1a",
+        padding: "20mm",
+        boxSizing: "border-box",
+        minHeight: "297mm",
+        background: `
+          repeating-linear-gradient(
+            to bottom,
+            #fff 0,
+            #fff calc(297mm - 1px),
+            #d1d5db calc(297mm - 1px),
+            #d1d5db 297mm
+          )
+        `,
+      }}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   );
