@@ -69,9 +69,45 @@ const styles = StyleSheet.create({
   signatureInitials: {
     fontSize: 10,
   },
+  inlineBold: {
+    fontWeight: "bold",
+  },
 });
 
-function htmlToLines(html: string): { text: string; bold: boolean }[] {
+interface Segment {
+  text: string;
+  bold: boolean;
+}
+
+interface Line {
+  segments: Segment[];
+  /** Строка-заголовок: целиком в верхнем регистре → центрируем и делаем жирной. */
+  heading: boolean;
+}
+
+// Управляющие символы-маркеры начала/конца жирного фрагмента.
+const BOLD_OPEN = String.fromCharCode(1);
+const BOLD_CLOSE = String.fromCharCode(2);
+
+/** Разбивает строку на сегменты по маркерам жирного текста. */
+function parseSegments(line: string): Segment[] {
+  const segments: Segment[] = [];
+  let bold = false;
+  let buf = "";
+  const flush = () => {
+    if (buf) segments.push({ text: buf, bold });
+    buf = "";
+  };
+  for (const ch of line) {
+    if (ch === BOLD_OPEN) { flush(); bold = true; }
+    else if (ch === BOLD_CLOSE) { flush(); bold = false; }
+    else buf += ch;
+  }
+  flush();
+  return segments;
+}
+
+function htmlToLines(html: string): Line[] {
   // Replace block-level tags with newlines
   let s = html
     .replace(/<br\s*\/?>/gi, "\n")
@@ -80,6 +116,11 @@ function htmlToLines(html: string): { text: string; bold: boolean }[] {
     .replace(/<\/h[1-6]>/gi, "\n")
     .replace(/<\/li>/gi, "\n")
     .replace(/<li[^>]*>/gi, "• ");
+
+  // Сохраняем жирные фрагменты (<strong>, <b>) маркерами до удаления тегов
+  s = s
+    .replace(/<(strong|b)(\s[^>]*)?>/gi, BOLD_OPEN)
+    .replace(/<\/(strong|b)>/gi, BOLD_CLOSE);
 
   // Strip all remaining tags
   s = s.replace(/<[^>]+>/g, "");
@@ -95,11 +136,12 @@ function htmlToLines(html: string): { text: string; bold: boolean }[] {
 
   return s
     .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .map((text) => ({
-      text,
-      bold: text === text.toUpperCase() && text.length > 3 && /[А-ЯЁA-Z]/.test(text),
+    .map((line) => line.replace(/^\s+|\s+$/g, ""))
+    .map((line) => ({ line, plain: line.replace(/[\u0001\u0002]/g, "") }))
+    .filter(({ plain }) => plain.length > 0)
+    .map(({ line, plain }) => ({
+      segments: parseSegments(line),
+      heading: plain === plain.toUpperCase() && plain.length > 3 && /[А-ЯЁA-Z]/.test(plain),
     }));
 }
 
@@ -122,7 +164,19 @@ export function ContractPdfDocument({ title, htmlContent, signatures = [] }: Pro
         ) : (
           lines.map((line, i) => (
             <View key={i} style={styles.section}>
-              <Text style={line.bold ? styles.bold : styles.text}>{line.text}</Text>
+              {line.heading ? (
+                <Text style={styles.bold}>
+                  {line.segments.map((seg) => seg.text).join("")}
+                </Text>
+              ) : (
+                <Text style={styles.text}>
+                  {line.segments.map((seg, j) => (
+                    <Text key={j} style={seg.bold ? styles.inlineBold : undefined}>
+                      {seg.text}
+                    </Text>
+                  ))}
+                </Text>
+              )}
             </View>
           ))
         )}
