@@ -10,7 +10,6 @@ interface Props {
   fields: TemplateField[];
 }
 
-// Sample values so the preview shows realistic text instead of {{placeholders}}.
 function sampleValues(fields: TemplateField[]): Record<string, string> {
   const v: Record<string, string> = {};
   for (const f of fields) v[f.name] = f.label;
@@ -21,21 +20,15 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
   const [content, setContent] = useState(initialContent);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [showPreview, setShowPreview] = useState(true);
   const taRef = useRef<HTMLTextAreaElement>(null);
 
   const insertPlaceholder = (name: string) => {
     const ta = taRef.current;
     const token = `{{${name}}}`;
-    if (!ta) {
-      setContent((c) => c + token);
-      return;
-    }
+    if (!ta) { setContent((c) => c + token); return; }
     const start = ta.selectionStart;
     const end = ta.selectionEnd;
-    const next = content.slice(0, start) + token + content.slice(end);
-    setContent(next);
-    // restore caret after the inserted token
+    setContent(content.slice(0, start) + token + content.slice(end));
     requestAnimationFrame(() => {
       ta.focus();
       const pos = start + token.length;
@@ -50,8 +43,7 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
     const start = ta.selectionStart;
     const end = ta.selectionEnd;
     const selected = content.slice(start, end) || "текст";
-    const next = content.slice(0, start) + before + selected + after + content.slice(end);
-    setContent(next);
+    setContent(content.slice(0, start) + before + selected + after + content.slice(end));
     requestAnimationFrame(() => {
       ta.focus();
       ta.setSelectionRange(start + before.length, start + before.length + selected.length);
@@ -80,107 +72,81 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
   const previewHtml = renderTemplate(content, formatValues(sampleValues(fields), fields));
 
   return (
-    <div>
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <button
-          type="button"
-          onClick={() => wrap("<h3>", "</h3>")}
-          className="text-xs border border-gray-300 px-2 py-1 rounded hover:bg-gray-50"
-        >
-          Заголовок
-        </button>
-        <button
-          type="button"
-          onClick={() => wrap("<p>", "</p>")}
-          className="text-xs border border-gray-300 px-2 py-1 rounded hover:bg-gray-50"
-        >
-          Абзац
-        </button>
-        <button
-          type="button"
-          onClick={() => wrap("<strong>", "</strong>")}
-          className="text-xs border border-gray-300 px-2 py-1 rounded hover:bg-gray-50 font-bold"
-        >
-          Жирный
-        </button>
-        <span className="w-px h-5 bg-gray-200 mx-1" />
-        <button
-          type="button"
-          onClick={() => setShowPreview((p) => !p)}
-          className="text-xs text-blue-600 hover:text-blue-800"
-        >
-          {showPreview ? "Скрыть превью" : "Показать превью"}
-        </button>
-      </div>
+    /* Full-width split: left = editor, right = A4 preview */
+    <div className="flex gap-0 h-[calc(100vh-180px)] min-h-[600px]">
 
-      {/* Field chips */}
-      {fields.length > 0 && (
-        <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-1.5">
-            Кликните, чтобы вставить поле в текст:
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {fields.map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => insertPlaceholder(f.name)}
-                className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100"
-                title={`{{${f.name}}}`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
+      {/* ── LEFT: editor panel ── */}
+      <div className="flex flex-col w-1/2 border-r border-gray-200 bg-white">
+        {/* Toolbar */}
+        <div className="flex flex-wrap items-center gap-1.5 px-4 py-2 border-b border-gray-100 bg-gray-50">
+          <button type="button" onClick={() => wrap("<h3>", "</h3>")}
+            className="text-xs border border-gray-300 px-2 py-1 rounded hover:bg-white">Заголовок</button>
+          <button type="button" onClick={() => wrap("<p>", "</p>")}
+            className="text-xs border border-gray-300 px-2 py-1 rounded hover:bg-white">Абзац</button>
+          <button type="button" onClick={() => wrap("<strong>", "</strong>")}
+            className="text-xs border border-gray-300 px-2 py-1 rounded hover:bg-white font-bold">Жирный</button>
+          <button type="button" onClick={() => wrap("<ul><li>", "</li></ul>")}
+            className="text-xs border border-gray-300 px-2 py-1 rounded hover:bg-white">Список</button>
+
+          <span className="flex-1" />
+
+          <button type="button" onClick={save} disabled={saving}
+            className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-60">
+            {saving ? "Сохранение…" : "Сохранить"}
+          </button>
+          {saved && <span className="text-xs text-green-600">✓</span>}
         </div>
-      )}
 
-      <div className="space-y-4">
+        {/* Field chips */}
+        {fields.length > 0 && (
+          <div className="px-4 py-2 border-b border-gray-100 bg-gray-50">
+            <p className="text-xs text-gray-400 mb-1.5">Вставить поле:</p>
+            <div className="flex flex-wrap gap-1">
+              {fields.map((f) => (
+                <button key={f.id} type="button" onClick={() => insertPlaceholder(f.name)}
+                  title={`{{${f.name}}}`}
+                  className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded hover:bg-blue-100">
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Textarea */}
         <textarea
           ref={taRef}
           value={content}
-          onChange={(e) => {
-            setContent(e.target.value);
-            setSaved(false);
-          }}
+          onChange={(e) => { setContent(e.target.value); setSaved(false); }}
           spellCheck={false}
-          className="w-full h-[320px] border border-gray-300 rounded-lg p-3 font-mono text-xs leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-          placeholder="Введите текст договора. Используйте кнопки полей выше для вставки динамических значений."
+          className="flex-1 w-full p-4 font-mono text-xs leading-relaxed resize-none focus:outline-none"
+          placeholder="Введите HTML-текст договора. Используйте кнопки выше для вставки полей и форматирования."
         />
-
-        {showPreview && (
-          <div className="h-[600px] overflow-auto border border-gray-200 rounded-lg bg-gray-100 p-4">
-            {/* True A4 sheet: 210×297mm with ~20mm document margins. */}
-            <div
-              className="bg-white shadow-md mx-auto prose prose-sm max-w-none"
-              style={{
-                width: "210mm",
-                minHeight: "297mm",
-                padding: "20mm",
-                boxSizing: "border-box",
-                fontFamily: "'Times New Roman', serif",
-                fontSize: "11pt",
-                lineHeight: 1.6,
-                color: "#1a1a1a",
-              }}
-              dangerouslySetInnerHTML={{ __html: previewHtml }}
-            />
-          </div>
-        )}
       </div>
 
-      <div className="flex items-center gap-3 mt-4">
-        <button
-          type="button"
-          onClick={save}
-          disabled={saving}
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-60"
-        >
-          {saving ? "Сохранение…" : "Сохранить шаблон"}
-        </button>
-        {saved && <span className="text-sm text-green-600">✓ Сохранено</span>}
+      {/* ── RIGHT: A4 preview ── */}
+      <div className="flex flex-col w-1/2 bg-gray-100">
+        <div className="flex items-center px-4 py-2 border-b border-gray-200 bg-gray-50">
+          <span className="text-xs text-gray-500 font-medium">Превью A4</span>
+        </div>
+        <div className="flex-1 overflow-auto p-6 flex justify-center">
+          <div
+            className="bg-white shadow-md prose prose-sm max-w-none"
+            style={{
+              width: "210mm",
+              minHeight: "297mm",
+              padding: "20mm",
+              boxSizing: "border-box",
+              fontFamily: "'Times New Roman', serif",
+              fontSize: "11pt",
+              lineHeight: 1.6,
+              color: "#1a1a1a",
+            }}
+            dangerouslySetInnerHTML={{ __html: previewHtml }}
+          />
+        </div>
       </div>
+
     </div>
   );
 }
