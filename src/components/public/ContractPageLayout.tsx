@@ -153,30 +153,6 @@ export function ContractPageLayout({ contractId, templateHtml, fields, sections,
               </div>
             )}
 
-            {/* Main template fields */}
-            {fields.length > 0 && (
-              <div>
-                <h2 className="font-semibold text-gray-800 mb-4">Заполните данные</h2>
-                <ContractFillForm fields={fields} values={values} onChange={handleChange} />
-              </div>
-            )}
-
-            {/* Section-specific fields (only when section is enabled) */}
-            {sections.map((s) =>
-              enabledSections[s.id] && s.fields.length > 0 ? (
-                <div key={s.id}>
-                  <h2 className="font-semibold text-gray-800 mb-3 text-sm border-l-2 border-blue-400 pl-2">
-                    {s.title}
-                  </h2>
-                  <ContractFillForm
-                    fields={s.fields as unknown as TemplateField[]}
-                    values={values}
-                    onChange={handleChange}
-                  />
-                </div>
-              ) : null
-            )}
-
             {/* Подписи сторон */}
             <div>
               <h2 className="font-semibold text-gray-800 mb-3">Подписи сторон</h2>
