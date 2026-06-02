@@ -1,3 +1,5 @@
+import { formatNumberWithWords } from "./numToWords";
+
 const RU_MONTHS = [
   "января","февраля","марта","апреля","мая","июня",
   "июля","августа","сентября","октября","ноября","декабря",
@@ -23,6 +25,8 @@ export function formatValues(
   for (const f of fields) {
     if (f.type === "DATE" && result[f.name]) {
       result[f.name] = formatDateRu(result[f.name]);
+    } else if (f.type === "NUMBER" && result[f.name]) {
+      result[f.name] = formatNumberWithWords(result[f.name]);
     }
   }
   return result;
