@@ -29,15 +29,17 @@ export async function POST(req: Request, { params }: Ctx) {
   const values: Record<string, string> = body.values ?? (body as Record<string, string>);
   const enabledSectionIds = body.enabledSectionIds ? new Set(body.enabledSectionIds) : null;
 
-  let htmlContent: string;
+  const baseHtml = renderTemplate(contract.template.content, values);
 
+  let htmlContent: string;
   if (enabledSectionIds && contract.template.sections.length > 0) {
-    const parts = contract.template.sections
+    const sectionsHtml = contract.template.sections
       .filter((s) => enabledSectionIds.has(s.id))
-      .map((s) => `<h3>${s.title}</h3>${renderTemplate(s.content, values)}`);
-    htmlContent = parts.join("\n") || renderTemplate(contract.template.content, values);
+      .map((s) => `<h3>${s.title}</h3>${renderTemplate(s.content, values)}`)
+      .join("\n");
+    htmlContent = baseHtml + "\n" + sectionsHtml;
   } else {
-    htmlContent = renderTemplate(contract.template.content, values);
+    htmlContent = baseHtml;
   }
 
   const stream = await renderToStream(
