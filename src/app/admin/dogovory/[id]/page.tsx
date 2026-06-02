@@ -55,31 +55,28 @@ export default async function EditContractPage({ params }: Props) {
         </div>
       </div>
 
-      {/* ── Body: sidebar (fields+sections) + split editor ── */}
-      <div className="flex flex-1 overflow-hidden">
-
-        {/* Left sidebar: fields & sections */}
-        <div className="w-80 shrink-0 bg-white border-r border-gray-200 overflow-y-auto">
-          <div className="p-4 border-b border-gray-100">
+      {/* ── Fields & sections (horizontal strip, scrollable) ── */}
+      <div className="shrink-0 bg-white border-b border-gray-200 overflow-y-auto max-h-72">
+        <div className="flex gap-0 divide-x divide-gray-100 p-4">
+          <div className="pr-6 min-w-64">
             <h2 className="text-sm font-semibold text-gray-800 mb-3">Поля договора</h2>
             <FieldList contractId={id} initialFields={contract.template?.fields ?? []} />
           </div>
-          <div className="p-4">
+          <div className="pl-6 min-w-64">
             <h2 className="text-sm font-semibold text-gray-800 mb-1">Разделы договора</h2>
             <p className="text-xs text-gray-400 mb-3">Выключаемые блоки текста.</p>
             <SectionList contractId={id} initialSections={contract.template?.sections ?? []} />
           </div>
         </div>
+      </div>
 
-        {/* Split editor + preview */}
-        <div className="flex-1 overflow-hidden">
-          <TemplateBodyEditor
-            contractId={id}
-            initialContent={contract.template?.content ?? ""}
-            fields={contract.template?.fields ?? []}
-          />
-        </div>
-
+      {/* ── Split editor + preview ── */}
+      <div className="flex-1 overflow-hidden">
+        <TemplateBodyEditor
+          contractId={id}
+          initialContent={contract.template?.content ?? ""}
+          fields={contract.template?.fields ?? []}
+        />
       </div>
     </div>
   );

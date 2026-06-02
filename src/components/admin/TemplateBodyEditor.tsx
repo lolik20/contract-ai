@@ -73,7 +73,7 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
 
   return (
     /* Full-width split: left = editor, right = A4 preview */
-    <div className="flex gap-0 h-[calc(100vh-180px)] min-h-[600px]">
+    <div className="flex h-full min-h-[400px]">
 
       {/* ── LEFT: editor panel ── */}
       <div className="flex flex-col w-1/2 border-r border-gray-200 bg-white">
