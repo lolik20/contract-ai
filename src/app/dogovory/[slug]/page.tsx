@@ -89,6 +89,8 @@ export default async function ContractPage({ params }: Props) {
           fields={fields}
           sections={sections}
           introText={seo?.introText}
+          party1Label={template?.party1Label ?? "Сторона 1"}
+          party2Label={template?.party2Label ?? "Сторона 2"}
         />
       </main>
     </div>

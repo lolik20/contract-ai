@@ -5,6 +5,7 @@ import { FieldList } from "@/components/admin/FieldList";
 import { ContractMetaEditor } from "@/components/admin/ContractMetaEditor";
 import { TemplateBodyEditor } from "@/components/admin/TemplateBodyEditor";
 import { SectionList } from "@/components/admin/SectionList";
+import { SignatureLabelsEditor } from "@/components/admin/SignatureLabelsEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -66,6 +67,15 @@ export default async function EditContractPage({ params }: Props) {
             <h2 className="text-sm font-semibold text-gray-800 mb-1">Разделы договора</h2>
             <p className="text-xs text-gray-400 mb-3">Выключаемые блоки текста.</p>
             <SectionList contractId={id} initialSections={contract.template?.sections ?? []} />
+          </div>
+          <div className="pl-6 min-w-56">
+            <h2 className="text-sm font-semibold text-gray-800 mb-1">Подписи сторон</h2>
+            <p className="text-xs text-gray-400 mb-3">Заголовки в готовом документе.</p>
+            <SignatureLabelsEditor
+              contractId={id}
+              initialParty1Label={contract.template?.party1Label ?? "Сторона 1"}
+              initialParty2Label={contract.template?.party2Label ?? "Сторона 2"}
+            />
           </div>
         </div>
       </div>

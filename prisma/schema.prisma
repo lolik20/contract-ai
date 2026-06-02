@@ -46,6 +46,9 @@ model ContractTemplate {
   version        Int             @default(1)
   updatedAt      DateTime        @updatedAt
 
+  party1Label    String          @default("Сторона 1")
+  party2Label    String          @default("Сторона 2")
+
   fields         TemplateField[]
   sections       ContractSection[]
 

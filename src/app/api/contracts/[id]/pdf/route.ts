@@ -3,7 +3,7 @@ import { renderToStream } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { prisma } from "@/lib/prisma";
 import { renderTemplate } from "@/lib/template";
-import { ContractPdfDocument } from "@/lib/pdf";
+import { ContractPdfDocument, type SignatureData } from "@/lib/pdf";
 
 interface Ctx {
   params: Promise<{ id: string }>;
@@ -25,9 +25,26 @@ export async function POST(req: Request, { params }: Ctx) {
     return NextResponse.json({ error: "Template not found" }, { status: 404 });
   }
 
-  const body: { values?: Record<string, string>; enabledSectionIds?: string[] } = await req.json();
+  const body: {
+    values?: Record<string, string>;
+    enabledSectionIds?: string[];
+    signatures?: Partial<SignatureData>[];
+  } = await req.json();
   const values: Record<string, string> = body.values ?? (body as Record<string, string>);
   const enabledSectionIds = body.enabledSectionIds ? new Set(body.enabledSectionIds) : null;
+
+  const signatures: SignatureData[] = Array.isArray(body.signatures)
+    ? body.signatures
+        .map((s) => ({
+          label: typeof s?.label === "string" ? s.label : "",
+          initials: typeof s?.initials === "string" ? s.initials : "",
+          dataUrl:
+            typeof s?.dataUrl === "string" && s.dataUrl.startsWith("data:image/")
+              ? s.dataUrl
+              : "",
+        }))
+        .filter((s) => s.dataUrl || s.initials)
+    : [];
 
   const baseHtml = renderTemplate(contract.template.content, values);
 
@@ -43,7 +60,7 @@ export async function POST(req: Request, { params }: Ctx) {
   }
 
   const stream = await renderToStream(
-    createElement(ContractPdfDocument, { title: contract.name, htmlContent })
+    createElement(ContractPdfDocument, { title: contract.name, htmlContent, signatures })
   );
 
   const chunks: Buffer[] = [];
