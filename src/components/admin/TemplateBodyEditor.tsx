@@ -129,26 +129,18 @@ export function TemplateBodyEditor({ contractId, initialContent, fields }: Props
         <div className="flex items-center px-4 py-2 border-b border-gray-200 bg-gray-50">
           <span className="text-xs text-gray-500 font-medium">Превью A4</span>
         </div>
-        <div className="flex-1 overflow-auto bg-gray-200 p-6 flex justify-center">
+        <div className="flex-1 overflow-auto bg-gray-100 p-6 flex justify-center">
           <div
             className="bg-white shadow-md prose prose-sm max-w-none"
             style={{
               width: "210mm",
-              minHeight: "297mm",
+              minWidth: "210mm",
               padding: "20mm",
               boxSizing: "border-box",
               fontFamily: "'Times New Roman', serif",
               fontSize: "11pt",
               lineHeight: 1.6,
               color: "#1a1a1a",
-              backgroundImage: `repeating-linear-gradient(
-                to bottom,
-                transparent 0,
-                transparent calc(297mm - 20px),
-                #e5e7eb calc(297mm - 20px),
-                #e5e7eb calc(297mm + 20px),
-                transparent calc(297mm + 20px)
-              )`,
             }}
             dangerouslySetInnerHTML={{ __html: previewHtml }}
           />

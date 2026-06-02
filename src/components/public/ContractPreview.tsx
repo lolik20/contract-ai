@@ -31,30 +31,19 @@ export function ContractPreview({ templateHtml, values, sections = [], enabledSe
     html = renderTemplate(templateHtml, values);
   }
 
-  // Render content split into A4 page blocks with visible gaps between them.
-  // We use a wrapper with gray bg and per-page white divs separated by margin.
   return (
-    <div id="contract-preview" className="bg-gray-200 rounded-lg p-4 space-y-0">
+    <div id="contract-preview" className="w-full overflow-x-auto">
       <div
-        className="bg-white shadow-md mx-auto"
         style={{
           width: "210mm",
-          minHeight: "297mm",
+          minWidth: "210mm",
           padding: "20mm",
           boxSizing: "border-box",
           fontFamily: "'Times New Roman', serif",
           fontSize: "11pt",
           lineHeight: 1.6,
           color: "#1a1a1a",
-          /* Paint a gray band every 297mm to simulate page breaks */
-          backgroundImage: `repeating-linear-gradient(
-            to bottom,
-            transparent 0,
-            transparent calc(297mm - 20px),
-            #e5e7eb calc(297mm - 20px),
-            #e5e7eb calc(297mm + 20px),
-            transparent calc(297mm + 20px)
-          )`,
+          background: "#fff",
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
