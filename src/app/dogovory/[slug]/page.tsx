@@ -47,7 +47,8 @@ export default async function ContractPage({ params }: Props) {
       seo: true,
       template: {
         include: {
-          fields: true,
+          fields: { orderBy: { order: "asc" } },
+          fieldGroups: { orderBy: { order: "asc" } },
           sections: {
             orderBy: { order: "asc" },
             include: { fields: { orderBy: { order: "asc" } } },
@@ -61,6 +62,7 @@ export default async function ContractPage({ params }: Props) {
 
   const { seo, template } = contract;
   const fields = template?.fields ?? [];
+  const fieldGroups = template?.fieldGroups ?? [];
   const sections = template?.sections ?? [];
   const content = template?.content ?? "";
 
@@ -87,6 +89,7 @@ export default async function ContractPage({ params }: Props) {
           contractId={contract.id}
           templateHtml={content}
           fields={fields}
+          fieldGroups={fieldGroups}
           sections={sections}
           introText={seo?.introText}
           party1Label={template?.party1Label ?? "Сторона 1"}

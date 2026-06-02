@@ -26,6 +26,7 @@ const schema = z.object({
   required: z.boolean(),
   order: z.number().int(),
   options: z.string().optional(),
+  groupId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -38,9 +39,13 @@ interface Props {
   onCancel: () => void;
   /** Override base URL, e.g. for section fields */
   baseUrl?: string;
+  /** Группы полей; если переданы — показывается выбор группы */
+  groups?: { id: string; title: string }[];
+  /** Группа по умолчанию для нового поля */
+  defaultGroupId?: string | null;
 }
 
-export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCancel, baseUrl }: Props) {
+export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCancel, baseUrl, groups, defaultGroupId }: Props) {
   const isNew = !field;
   const { register, handleSubmit, watch, setValue, control, formState: { errors, isSubmitting } } =
     useForm<FormData>({
@@ -55,8 +60,9 @@ export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCa
             required: field.required,
             order: field.order,
             options: field.options ?? "",
+            groupId: field.groupId ?? "",
           }
-        : { type: "TEXT", required: true, order: defaultOrder },
+        : { type: "TEXT", required: true, order: defaultOrder, groupId: defaultGroupId ?? "" },
     });
 
   const type = watch("type");
@@ -74,10 +80,15 @@ export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCa
     const url = field ? `${base}/${field.id}` : base;
     const method = field ? "PUT" : "POST";
 
+    // groupId передаём только когда группы поддерживаются (основные поля),
+    // иначе — не шлём (например, для полей разделов).
+    const { groupId, ...rest } = data;
+    const payload = groups ? { ...rest, groupId: groupId || null } : rest;
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
     if (res.ok) onSaved();
   };
@@ -169,6 +180,21 @@ export function FieldEditor({ contractId, field, defaultOrder = 0, onSaved, onCa
           </label>
         </div>
       </div>
+
+      {groups && (
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Группа полей</label>
+          <select
+            {...register("groupId")}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Без группы</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>{g.title}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="flex gap-2 pt-2">
         <button
