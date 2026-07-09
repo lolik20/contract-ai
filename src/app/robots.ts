@@ -4,7 +4,11 @@ export default function robots(): MetadataRoute.Robots {
   const base = process.env.NEXT_PUBLIC_SITE_URL || "https://dogovorilos.ru";
   return {
     rules: [
-      { userAgent: "*", allow: "/", disallow: ["/admin/"] },
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/admin/", "/kabinet", "/neuro/chat", "/vhod", "/api/"],
+      },
     ],
     sitemap: `${base}/sitemap.xml`,
   };

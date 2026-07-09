@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/admin/dogovory", label: "Договоры" },
+  { href: "/admin/statistika", label: "Статистика" },
+  { href: "/admin/dialogi", label: "Диалоги" },
 ];
 
 export function AdminSidebar() {

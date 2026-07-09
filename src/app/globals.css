@@ -77,3 +77,47 @@ body {
   size: A4;
   margin: 20mm;
 }
+
+/* ------------------------------------------------------------------ */
+/* Mobile / iOS утилиты                                                */
+/* ------------------------------------------------------------------ */
+
+/* Отступы под safe-area (iPhone notch / home indicator) */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-x {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Динамическая высота вьюпорта (учитывает адресную строку iOS Safari) */
+.min-h-dvh-safe {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+.h-dvh-safe {
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* iOS не зумит инпуты при фокусе, если font-size >= 16px */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Убираем серую подсветку тапа на iOS/Android */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Без анимаций по всему проекту (по требованию дизайна) */
+* {
+  scroll-behavior: auto;
+}

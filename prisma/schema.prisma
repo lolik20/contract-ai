@@ -17,6 +17,7 @@ model ContractType {
 
   seo         ContractSeo?
   template    ContractTemplate?
+  downloads   TemplateDownload[]
 
   @@map("contract_types")
 }
@@ -132,4 +133,117 @@ enum FieldType {
   SELECT
   EMAIL
   PHONE
+}
+
+// ------------------------------------------------------------------
+// Нейроюрист: пользователи, авторизация, консультации, оплата
+// ------------------------------------------------------------------
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+enum TariffPlan {
+  Q3
+  Q10
+  Q30
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+model User {
+  id             String         @id @default(cuid())
+  yandexId       String?        @unique
+  email          String?        @unique
+  name           String?
+  avatarUrl      String?
+  role           UserRole       @default(USER)
+  questionBalance Int           @default(1)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  sessions       Session[]
+  consultations  Consultation[]
+  purchases      Purchase[]
+  downloads      TemplateDownload[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Consultation {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  messages  Message[]
+
+  @@index([userId])
+  @@map("consultations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  consultationId String
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  citations      String?
+  createdAt      DateTime     @default(now())
+
+  @@index([consultationId])
+  @@map("messages")
+}
+
+model Purchase {
+  id                String        @id @default(cuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              TariffPlan
+  questions         Int
+  amountKopecks     Int
+  status            PaymentStatus @default(PENDING)
+  provider          String        @default("tbank")
+  providerPaymentId String?       @unique
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([userId])
+  @@map("purchases")
+}
+
+model TemplateDownload {
+  id             String       @id @default(cuid())
+  contractTypeId String
+  contractType   ContractType @relation(fields: [contractTypeId], references: [id], onDelete: Cascade)
+  userId         String?
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt      DateTime     @default(now())
+
+  @@index([contractTypeId])
+  @@map("template_downloads")
 }
