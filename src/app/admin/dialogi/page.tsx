@@ -20,7 +20,7 @@ export default async function AdminDialogsPage() {
         Просмотр консультаций нейроюриста под ролью администратора.
       </p>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-gray-200 bg-white">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-md">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
