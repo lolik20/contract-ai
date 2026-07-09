@@ -8,9 +8,9 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6">
+    <div className="mx-auto w-full max-w-md rounded-2xl border border-gray-100 bg-white p-6 shadow-xl">
       {/* Подарок */}
-      <div className="mb-5 rounded-xl bg-blue-50 p-4 text-center">
+      <div className="mb-5 rounded-xl bg-blue-50 p-4 text-center shadow-sm">
         <div className="text-base font-semibold text-blue-800">
           🎁 В подарок — 1 бесплатный вопрос нейроюристу
         </div>
@@ -55,8 +55,8 @@ export function LoginForm() {
             setError("Подтвердите согласие с условиями");
           }
         }}
-        className={`mt-5 flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium text-white ${
-          agree ? "bg-black hover:bg-gray-800" : "cursor-not-allowed bg-gray-300"
+        className={`mt-5 flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white ${
+          agree ? "bg-black shadow-md hover:bg-gray-800" : "cursor-not-allowed bg-gray-300"
         }`}
       >
         Войти через Яндекс ID

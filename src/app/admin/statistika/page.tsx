@@ -49,7 +49,7 @@ export default async function AdminStatsPage() {
         <StatCard label="Гости" value={sum.guests} />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-gray-200 bg-white">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-md">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
@@ -84,7 +84,7 @@ export default async function AdminStatsPage() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4">
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
       <div className="text-xs uppercase tracking-wide text-gray-400">{label}</div>
       <div className="mt-1 text-2xl font-bold text-gray-900">{value}</div>
     </div>

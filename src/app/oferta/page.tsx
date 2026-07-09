@@ -14,7 +14,7 @@ export default function OfferPage() {
     <div className="flex min-h-dvh-safe flex-col bg-gray-50">
       <SiteHeader />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
-        <article className="prose prose-sm max-w-none rounded-2xl border border-gray-200 bg-white p-6 prose-headings:font-semibold prose-headings:text-gray-900">
+        <article className="prose prose-sm max-w-none rounded-2xl border border-gray-100 bg-white p-6 shadow-md sm:p-8 prose-headings:font-semibold prose-headings:text-gray-900">
           <h1>Публичная оферта</h1>
           <p>
             Настоящий документ является официальным предложением (публичной

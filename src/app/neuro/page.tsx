@@ -51,7 +51,7 @@ export default async function NeuroLanding() {
           <div className="mt-6">
             <Link
               href={ctaHref}
-              className="inline-block rounded-lg bg-blue-700 px-6 py-3 text-base font-medium text-white hover:bg-blue-800"
+              className="inline-block rounded-xl bg-blue-700 px-6 py-3.5 text-base font-medium text-white shadow-lg shadow-blue-200 hover:bg-blue-800"
             >
               Задать вопрос бесплатно
             </Link>
@@ -64,9 +64,9 @@ export default async function NeuroLanding() {
             {STEPS.map((s) => (
               <div
                 key={s.n}
-                className="rounded-2xl border border-gray-200 bg-white p-5"
+                className="rounded-2xl border border-gray-100 bg-white p-6 shadow-md"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 shadow-sm">
                   {s.n}
                 </div>
                 <div className="mt-3 font-semibold text-gray-900">{s.t}</div>

@@ -44,7 +44,7 @@ export default async function CabinetPage() {
         </div>
 
         {/* Баланс */}
-        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-6 shadow-md sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="text-gray-600">Остаток:</span>
             <BalanceBadge balance={user.questionBalance} />
@@ -71,7 +71,7 @@ export default async function CabinetPage() {
           {consultations.length === 0 ? (
             <p className="mt-2 text-sm text-gray-500">Диалогов пока нет.</p>
           ) : (
-            <ul className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white">
+            <ul className="mt-3 divide-y divide-gray-50 rounded-2xl border border-gray-100 bg-white shadow-sm">
               {consultations.map((c) => (
                 <li key={c.id}>
                   <Link
@@ -97,7 +97,7 @@ export default async function CabinetPage() {
           {purchases.length === 0 ? (
             <p className="mt-2 text-sm text-gray-500">Покупок пока нет.</p>
           ) : (
-            <ul className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-200 bg-white">
+            <ul className="mt-3 divide-y divide-gray-50 rounded-2xl border border-gray-100 bg-white shadow-sm">
               {purchases.map((p) => (
                 <li
                   key={p.id}

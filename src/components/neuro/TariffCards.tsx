@@ -47,12 +47,14 @@ function TariffCard({ tariff }: { tariff: Tariff }) {
 
   return (
     <div
-      className={`flex flex-col rounded-2xl border bg-white p-5 ${
-        tariff.highlighted ? "border-blue-500 ring-1 ring-blue-500" : "border-gray-200"
+      className={`flex flex-col rounded-2xl bg-white p-6 ${
+        tariff.highlighted
+          ? "border-2 border-blue-500 shadow-xl shadow-blue-100"
+          : "border border-gray-100 shadow-md"
       }`}
     >
       {tariff.highlighted && (
-        <div className="mb-2 inline-block self-start rounded-full bg-blue-600 px-2 py-0.5 text-xs font-medium text-white">
+        <div className="mb-2 inline-block self-start rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-medium text-white shadow-sm">
           Выгодно
         </div>
       )}
@@ -67,7 +69,7 @@ function TariffCard({ tariff }: { tariff: Tariff }) {
         type="button"
         onClick={buy}
         disabled={loading}
-        className="mt-5 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-60"
+        className="mt-5 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 hover:bg-blue-800 disabled:opacity-60"
       >
         {loading ? "Переходим к оплате…" : "Купить"}
       </button>

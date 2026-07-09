@@ -247,7 +247,7 @@ export function Chat({
                       key={q}
                       type="button"
                       onClick={() => send(q)}
-                      className="rounded-xl border border-gray-200 bg-white p-3 text-left text-sm text-gray-700 hover:border-blue-300 hover:bg-blue-50"
+                      className="rounded-2xl border border-gray-100 bg-white p-4 text-left text-sm text-gray-700 shadow-sm hover:border-blue-200 hover:shadow-md"
                     >
                       {q}
                     </button>
@@ -286,7 +286,7 @@ export function Chat({
             e.preventDefault();
             send(input);
           }}
-          className="border-t border-gray-200 bg-white p-3 safe-bottom"
+          className="border-t border-gray-100 bg-white p-3 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] safe-bottom"
         >
           <div className="mx-auto flex max-w-2xl items-end gap-2">
             <textarea
@@ -305,7 +305,7 @@ export function Chat({
             <button
               type="submit"
               disabled={streaming || !input.trim()}
-              className="rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50"
+              className="rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-medium text-white shadow-sm shadow-blue-200 hover:bg-blue-800 disabled:opacity-50 disabled:shadow-none"
             >
               Отправить
             </button>
@@ -327,10 +327,10 @@ function MessageBubble({
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm ${
+        className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
           isUser
-            ? "bg-blue-700 text-white"
-            : "border border-gray-200 bg-white text-gray-800"
+            ? "bg-blue-700 text-white shadow-blue-200"
+            : "border border-gray-100 bg-white text-gray-800"
         }`}
       >
         {content}
