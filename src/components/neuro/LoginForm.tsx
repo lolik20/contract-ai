@@ -1,38 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-export function LoginForm({ isDev }: { isDev: boolean }) {
-  const router = useRouter();
+export function LoginForm() {
   const [agree, setAgree] = useState(false);
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  async function devLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!agree) {
-      setError("Подтвердите согласие с условиями");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    const res = await fetch("/api/auth/dev-login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
-    setLoading(false);
-    if (res.ok) {
-      const data = await res.json();
-      router.push(`/neuro/chat${data.isNew ? "?welcome=1" : ""}`);
-      router.refresh();
-    } else {
-      setError("Не удалось войти");
-    }
-  }
 
   return (
     <div className="mx-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6">
@@ -88,30 +61,6 @@ export function LoginForm({ isDev }: { isDev: boolean }) {
       >
         Войти через Яндекс ID
       </a>
-
-      {/* Dev-вход */}
-      {isDev && (
-        <form onSubmit={devLogin} className="mt-4 border-t border-gray-100 pt-4">
-          <div className="text-xs font-medium uppercase tracking-wide text-gray-400">
-            Вход для разработки
-          </div>
-          <input
-            type="email"
-            required
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-2 w-full rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-60"
-          >
-            {loading ? "Входим…" : "Войти по email (dev)"}
-          </button>
-        </form>
-      )}
 
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
     </div>

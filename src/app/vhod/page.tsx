@@ -20,7 +20,7 @@ export default async function LoginPage() {
     <div className="flex min-h-dvh-safe flex-col bg-gray-50">
       <SiteHeader />
       <main className="flex flex-1 items-center justify-center px-4 py-12">
-        <LoginForm isDev={process.env.NODE_ENV !== "production"} />
+        <LoginForm />
       </main>
       <SiteFooter />
     </div>
