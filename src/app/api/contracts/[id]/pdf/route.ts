@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { prisma } from "@/lib/prisma";
 import { renderTemplate } from "@/lib/template";
 import { ContractPdfDocument, type SignatureData } from "@/lib/pdf";
+import { getCurrentUser } from "@/lib/auth";
 
 interface Ctx {
   params: Promise<{ id: string }>;
@@ -58,6 +59,12 @@ export async function POST(req: Request, { params }: Ctx) {
   } else {
     htmlContent = baseHtml;
   }
+
+  // Логируем скачивание (авторизованный/гость) для аналитики. Не блокируем ответ.
+  const currentUser = await getCurrentUser().catch(() => null);
+  await prisma.templateDownload
+    .create({ data: { contractTypeId: id, userId: currentUser?.id ?? null } })
+    .catch(() => {});
 
   const stream = await renderToStream(
     createElement(ContractPdfDocument, { title: contract.name, htmlContent, signatures })

@@ -32,8 +32,8 @@ interface Props {
 export function SectionEditor({ contractId, section, defaultOrder = 0, onSaved, onCancel }: Props) {
   const [showFields, setShowFields] = useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
     defaultValues: {
       title: section?.title ?? "",
